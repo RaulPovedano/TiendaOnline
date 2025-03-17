@@ -5,6 +5,8 @@ import express from "express";
 import { connectDB } from "./config/database.js";
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
+import orderRoutes from "./routes/order.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
 
 // Cargamos las variables de entorno
 dotenv.config();
@@ -18,6 +20,8 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/cart", cartRoutes);  // Add this line
 
 // Error handling middleware para manejar errores de rutas no encontradas y errores de servidor 
 app.use((err, req, res, next) => {
