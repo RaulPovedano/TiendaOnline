@@ -15,8 +15,9 @@ import { Product } from '../../models/product.model';
         <div *ngFor="let product of products" 
              class="border rounded-lg p-4 shadow-sm">
           <h3 class="text-xl font-semibold">{{product.name}}</h3>
+          <img [src]=product.img alt={{product.name}} class="w-full h-40 object-cover rounded-lg mb-2">
           <p class="text-gray-600">{{product.description}}</p>
-          <p class="text-lg font-bold mt-2">€{{product.price}}</p>
+          <p class="text-lg font-bold mt-2">{{product.price}}€</p>
           <p class="text-sm text-gray-500">Stock: {{product.stock}}</p>
           <button (click)="addToCart(product)"
                   class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg"
