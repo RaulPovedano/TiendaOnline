@@ -179,15 +179,26 @@
 
 <header class="bg-white shadow-sm">
   <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-    <h1 class="text-xl font-bold">Mi Tienda Online</h1>
+    <h1 class="text-xl font-bold">
+      <a routerLink="/" class="text-gray-900 hover:text-gray-700">Mi Tienda Online</a>
+    </h1>
     <div class="flex gap-4">
-      <a href="/cart" class="text-gray-600 hover:text-gray-900">
+      <a routerLink="/cart" class="text-gray-600 hover:text-gray-900">
         Carrito
       </a>
-      <a href="/login" class="text-gray-600 hover:text-gray-900">
-        Iniciar Sesión
+      <ng-container *ngIf="!(authService.user$ | async); else userMenu">
+        <a routerLink="/login" class="text-gray-600 hover:text-gray-900">
+          Iniciar Sesión
         </a>
+      </ng-container>
+      <ng-template #userMenu>
+        <div class="relative">
+          <button (click)="logout()" class="text-gray-600 hover:text-gray-900">
+            Cerrar Sesión
+          </button>
       </div>
+      </ng-template>
+    </div>
   </nav>
 </header>
 
