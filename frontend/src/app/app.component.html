@@ -182,9 +182,15 @@
     <h1 class="text-xl font-bold">
       <a routerLink="/" class="text-gray-900 hover:text-gray-700">Mi Tienda Online</a>
     </h1>
-    <div class="flex gap-4">
-      <a routerLink="/cart" class="text-gray-600 hover:text-gray-900">
+    <div class="flex gap-4 items-center">
+      <a routerLink="/cart" class="text-gray-600 hover:text-gray-900 relative">
         Carrito
+        <ng-container *ngIf="(cartService.cart$ | async) as cart">
+          <span *ngIf="(cart | cartCount) > 0" 
+                class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {{cart | cartCount}}
+          </span>
+        </ng-container>
       </a>
       <ng-container *ngIf="!(authService.user$ | async); else userMenu">
         <a routerLink="/login" class="text-gray-600 hover:text-gray-900">

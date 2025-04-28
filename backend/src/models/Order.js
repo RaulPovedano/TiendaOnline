@@ -1,5 +1,14 @@
 import mongoose from 'mongoose';
 
+// Añadir el esquema de datos de envío
+const shippingDataSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  address: { type: String, required: true },
+  city: { type: String, required: true },
+  postalCode: { type: String, required: true },
+  phone: { type: String, required: true }
+});
+
 const orderSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   items: [
@@ -18,7 +27,8 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: { type: String, enum: ['credit_card', 'paypal', 'test_mode'], required: true }, 
   paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' }, 
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now } 
+  updatedAt: { type: Date, default: Date.now },
+  shippingData: { type: shippingDataSchema, required: true }
 });
 
 export const Order = mongoose.model('Order', orderSchema);

@@ -21,7 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/api/cart", cartRoutes);  // Add this line
+app.use("/api/cart", cartRoutes);
 
 // Error handling middleware para manejar errores de rutas no encontradas y errores de servidor 
 app.use((err, req, res, next) => {
