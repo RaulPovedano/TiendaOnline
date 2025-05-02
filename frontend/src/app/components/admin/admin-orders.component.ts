@@ -28,18 +28,10 @@ import { DecimalPipe } from '@angular/common';
           <tbody class="bg-white divide-y divide-gray-200">
             <tr *ngFor="let order of orders">
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order._id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.user?.name }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.userId?.name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.total | number:'1.2-2' }}€</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <select [(ngModel)]="order.status" (change)="updateOrderStatus(order)" class="text-sm border rounded px-2 py-1">
-                  <option value="pending">Pendiente</option>
-                  <option value="processing">En proceso</option>
-                  <option value="shipped">Enviado</option>
-                  <option value="delivered">Entregado</option>
-                  <option value="cancelled">Cancelado</option>
-                </select>
-              </td>
+              <td class="px-6 py-4 whitespace-nowrap">{{ estadoMap[order.status] }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button (click)="viewOrderDetails(order)" class="text-indigo-600 hover:text-indigo-900">Ver Detalles</button>
               </td>
@@ -62,10 +54,10 @@ import { DecimalPipe } from '@angular/common';
           
           <div class="mb-4">
             <p class="text-sm text-gray-600">ID del Pedido: {{ selectedOrder._id }}</p>
-            <p class="text-sm text-gray-600">Cliente: {{ selectedOrder.user?.name }}</p>
-            <p class="text-sm text-gray-600">Email: {{ selectedOrder.user?.email }}</p>
+            <p class="text-sm text-gray-600">Cliente: {{ selectedOrder.userId?.name }}</p>
+            <p class="text-sm text-gray-600">Email: {{ selectedOrder.userId?.email }}</p>
             <p class="text-sm text-gray-600">Fecha: {{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
-            <p class="text-sm text-gray-600">Estado: {{ selectedOrder.status }}</p>
+            <p class="text-sm text-gray-600">Estado: {{ estadoMap[selectedOrder.status] }}</p>
           </div>
           
           <div class="mb-4">
@@ -82,9 +74,9 @@ import { DecimalPipe } from '@angular/common';
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <tr *ngFor="let item of selectedOrder.items">
-                    <td class="px-4 py-2 text-sm">{{ item.productId.name }}</td>
+                    <td class="px-4 py-2 text-sm">{{ item.productId?.name }}</td>
                     <td class="px-4 py-2 text-sm">{{ item.quantity }}</td>
-                    <td class="px-4 py-2 text-sm">{{ item.productId.price | number:'1.2-2' }}€</td>
+                    <td class="px-4 py-2 text-sm">{{ item.productId?.price | number:'1.2-2' }}€</td>
                     <td class="px-4 py-2 text-sm">{{ item.price | number:'1.2-2' }}€</td>
                   </tr>
                 </tbody>
@@ -100,7 +92,10 @@ import { DecimalPipe } from '@angular/common';
           
           <div class="mb-4">
             <h4 class="font-semibold mb-2">Dirección de envío:</h4>
-            <p class="text-sm text-gray-600">{{ selectedOrder.shippingAddress }}</p>
+            <p class="text-sm text-gray-600">Dirección: {{ selectedOrder.shippingData?.address }}</p>
+            <p class="text-sm text-gray-600">Ciudad: {{ selectedOrder.shippingData?.city }}</p>
+            <p class="text-sm text-gray-600">Código Postal: {{ selectedOrder.shippingData?.postalCode }}</p>
+            <p class="text-sm text-gray-600">Teléfono: {{ selectedOrder.shippingData?.phone }}</p>
           </div>
         </div>
       </div>
@@ -111,6 +106,14 @@ export class AdminOrdersComponent implements OnInit {
   orders: Order[] = [];
   selectedOrder: Order | null = null;
   private apiUrl = 'http://localhost:3000/api/admin/orders';
+
+  estadoMap: any = {
+    pending: 'Pendiente',
+    processing: 'En proceso',
+    shipped: 'Enviado',
+    delivered: 'Entregado',
+    cancelled: 'Cancelado'
+  };
 
   constructor(private http: HttpClient) {}
 

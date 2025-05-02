@@ -161,7 +161,8 @@ export const deleteProduct = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate('user', 'name email')
+      .populate('userId', 'name email')
+      .populate('items.productId')
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
@@ -180,7 +181,9 @@ export const updateOrderStatus = async (req, res) => {
       orderId,
       { status },
       { new: true }
-    ).populate('user', 'name email');
+    )
+    .populate('userId', 'name email')
+    .populate('items.productId');
 
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });
@@ -191,4 +194,4 @@ export const updateOrderStatus = async (req, res) => {
     console.error('Error updating order status:', error);
     res.status(500).json({ message: "Error updating order status" });
   }
-}; 
+};

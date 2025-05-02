@@ -13,7 +13,7 @@ export interface OrderItem {
 
 export interface Order {
   _id: string;
-  user: {
+  userId: {
     _id: string;
     name: string;
     email: string;
@@ -21,7 +21,12 @@ export interface Order {
   items: OrderItem[];
   total: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  shippingAddress: string;
+  shippingData?: {
+    address: string;
+    city: string;
+    postalCode: string;
+    phone: string;
+  };
   paymentMethod: string;
   createdAt: string;
   updatedAt: string;
