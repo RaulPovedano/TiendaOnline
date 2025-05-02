@@ -71,4 +71,28 @@ export class AuthService {
     }
     return null;
   }
+
+  updateUser(user: User): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    this.userSubject.next(user);
+  }
+
+  isAdmin(): boolean {
+    const user = this.userSubject.value;
+    return user?.role === 'ROLE_ADMIN';
+  }
+
+  updateProfile(userId: string, userData: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/profile`, userData)
+      .pipe(
+        tap(updatedUser => {
+          if (isPlatformBrowser(this.platformId)) {
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+          this.userSubject.next(updatedUser);
+        })
+      );
+  }
 } 

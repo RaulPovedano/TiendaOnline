@@ -66,7 +66,8 @@ export class RegisterComponent {
   user = {
     name: '',
     email: '',
-    password: ''
+    password: '',
+    role: 'ROLE_USER' as const
   };
   error: string = '';
 
@@ -87,4 +88,4 @@ export class RegisterComponent {
         }
       });
   }
-} 
+}

@@ -24,14 +24,23 @@ import { DecimalPipe } from '@angular/common';
           <p class="text-gray-600">{{product.description}}</p>
           <p class="text-lg font-bold mt-2">{{product.price | number:'1.2-2'}}€</p>
           <p class="text-sm text-gray-500">Stock: {{product.stock}}</p>
-          <button (click)="addToCart(product)"
-                  class="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-lg 
-                         hover:bg-blue-600 transition-colors"
-                  [disabled]="isAddingToCart"
-                  [class.opacity-50]="isAddingToCart">
-            <span *ngIf="!isAddingToCart">Añadir al carrito</span>
-            <span *ngIf="isAddingToCart">Añadiendo...</span>
-          </button>
+          
+          <div class="mt-4 space-y-2">
+            <button (click)="viewDetails(product)"
+                    class="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-lg 
+                           hover:bg-gray-300 transition-colors">
+              Ver Detalles
+            </button>
+            
+            <button (click)="addToCart(product)"
+                    class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg 
+                           hover:bg-blue-600 transition-colors"
+                    [disabled]="isAddingToCart"
+                    [class.opacity-50]="isAddingToCart">
+              <span *ngIf="!isAddingToCart">Añadir al carrito</span>
+              <span *ngIf="isAddingToCart">Añadiendo...</span>
+            </button>
+          </div>
         </div>
       </div>
       
@@ -65,6 +74,10 @@ export class ProductListComponent implements OnInit {
         next: (products) => this.products = products,
         error: (error) => console.error('Error cargando productos:', error)
       });
+  }
+
+  viewDetails(product: Product) {
+    this.router.navigate(['/products', product._id]);
   }
 
   addToCart(product: Product) {

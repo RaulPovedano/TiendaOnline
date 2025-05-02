@@ -198,11 +198,14 @@
         </a>
       </ng-container>
       <ng-template #userMenu>
-        <div class="relative">
+        <div class="relative flex gap-4">
+          <a routerLink="/profile" class="text-gray-600 hover:text-gray-900">
+            Mi Perfil
+          </a>
           <button (click)="logout()" class="text-gray-600 hover:text-gray-900">
             Cerrar Sesión
           </button>
-      </div>
+        </div>
       </ng-template>
     </div>
   </nav>
