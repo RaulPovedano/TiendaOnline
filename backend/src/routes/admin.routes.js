@@ -8,7 +8,9 @@ import {
   updateProduct,
   deleteProduct,
   getAllOrders,
-  updateOrderStatus
+  updateOrderStatus,
+  getTopCustomer,
+  getTopCustomersBySpent
 } from "../controllers/admin.controller.js";
 import { authenticateToken } from "../middleware/auth.js";
 
@@ -36,5 +38,8 @@ router.delete("/products/:productId", authenticateToken, isAdmin, deleteProduct)
 // Rutas de administración de pedidos
 router.get("/orders", authenticateToken, isAdmin, getAllOrders);
 router.put("/orders/:orderId/status", authenticateToken, isAdmin, updateOrderStatus);
+
+router.get("/top-customer", authenticateToken, isAdmin, getTopCustomer);
+router.get("/top-customers-spent", authenticateToken, isAdmin, getTopCustomersBySpent);
 
 export default router; 

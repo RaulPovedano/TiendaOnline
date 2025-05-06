@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { CartService } from '../../services/cart.service';
 import { Router } from '@angular/router';
@@ -13,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DecimalPipe],
+  imports: [CommonModule, FormsModule, DecimalPipe],
   template: `
     <div class="container mx-auto p-4">
       <h2 class="text-2xl font-bold mb-6">Finalizar Compra</h2>

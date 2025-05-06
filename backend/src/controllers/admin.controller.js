@@ -1,6 +1,7 @@
 import { User } from "../models/User.js";
 import { Product } from "../models/Product.js";
 import { Order } from "../models/Order.js";
+import mongoose from "mongoose";
 
 // Obtener todos los usuarios
 export const getAllUsers = async (req, res) => {
@@ -193,5 +194,63 @@ export const updateOrderStatus = async (req, res) => {
   } catch (error) {
     console.error('Error updating order status:', error);
     res.status(500).json({ message: "Error updating order status" });
+  }
+};
+
+export const getTopCustomer = async (req, res) => {
+  try {
+    const result = await Order.aggregate([
+      {
+        $group: {
+          _id: "$userId",
+          totalOrders: { $sum: 1 }
+        }
+      },
+      { $sort: { totalOrders: -1 } },
+      { $limit: 1 }
+    ]);
+
+    if (result.length === 0) {
+      return res.json({ user: null, totalOrders: 0 });
+    }
+
+    // Populate user info
+    const user = await User.findById(result[0]._id).select("name email");
+    res.json({ user, totalOrders: result[0].totalOrders });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching top customer" });
+  }
+};
+
+export const getTopCustomersBySpent = async (req, res) => {
+  try {
+    const result = await Order.aggregate([
+      {
+        $group: {
+          _id: "$userId",
+          totalSpent: { $sum: "$total" }
+        }
+      },
+      { $sort: { totalSpent: -1 } },
+      { $limit: 5 }
+    ]);
+
+    // Poblar los datos de usuario
+    const users = await User.find({
+      _id: { $in: result.map(r => r._id) }
+    }).select("name email");
+
+    // Unir los datos
+    const data = result.map(r => {
+      const user = users.find(u => u._id.equals(r._id));
+      return {
+        user,
+        totalSpent: r.totalSpent
+      };
+    });
+
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching top customers by spent" });
   }
 };
