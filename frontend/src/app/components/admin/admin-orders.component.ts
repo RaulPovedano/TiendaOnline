@@ -4,11 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Order } from '../../models/order.model';
 import { DecimalPipe } from '@angular/common';
+import { ChartType, ChartOptions } from 'chart.js';
+import { BaseChartDirective } from 'ng2-charts';
+import { AdminService } from '../../services/admin.service';
+import { NgChartsModule } from 'ng2-charts';
 
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, DecimalPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    NgChartsModule
+  ],
   template: `
     <div class="container mx-auto p-4">
       <h2 class="text-2xl font-bold mb-6">Administrar Pedidos</h2>
@@ -28,10 +36,19 @@ import { DecimalPipe } from '@angular/common';
           <tbody class="bg-white divide-y divide-gray-200">
             <tr *ngFor="let order of orders">
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order._id }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.userId?.name }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.userId.name }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.total | number:'1.2-2' }}€</td>
-              <td class="px-6 py-4 whitespace-nowrap">{{ estadoMap[order.status] }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <select [(ngModel)]="order.status" 
+                        (change)="updateOrderStatus(order)"
+                        class="text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                  <option value="pending">Pendiente</option>
+                  <option value="shipped">Enviado</option>
+                  <option value="delivered">Entregado</option>
+                  <option value="cancelled">Cancelado</option>
+                </select>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button (click)="viewOrderDetails(order)" class="text-indigo-600 hover:text-indigo-900">Ver Detalles</button>
               </td>
@@ -54,8 +71,8 @@ import { DecimalPipe } from '@angular/common';
           
           <div class="mb-4">
             <p class="text-sm text-gray-600">ID del Pedido: {{ selectedOrder._id }}</p>
-            <p class="text-sm text-gray-600">Cliente: {{ selectedOrder.userId?.name }}</p>
-            <p class="text-sm text-gray-600">Email: {{ selectedOrder.userId?.email }}</p>
+            <p class="text-sm text-gray-600">Cliente: {{ selectedOrder.userId.name }}</p>
+            <p class="text-sm text-gray-600">Email: {{ selectedOrder.userId.email }}</p>
             <p class="text-sm text-gray-600">Fecha: {{ selectedOrder.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
             <p class="text-sm text-gray-600">Estado: {{ estadoMap[selectedOrder.status] }}</p>
           </div>
@@ -74,9 +91,9 @@ import { DecimalPipe } from '@angular/common';
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <tr *ngFor="let item of selectedOrder.items">
-                    <td class="px-4 py-2 text-sm">{{ item.productId?.name }}</td>
+                    <td class="px-4 py-2 text-sm">{{ item.productId.name }}</td>
                     <td class="px-4 py-2 text-sm">{{ item.quantity }}</td>
-                    <td class="px-4 py-2 text-sm">{{ item.productId?.price | number:'1.2-2' }}€</td>
+                    <td class="px-4 py-2 text-sm">{{ item.productId.price | number:'1.2-2' }}€</td>
                     <td class="px-4 py-2 text-sm">{{ item.price | number:'1.2-2' }}€</td>
                   </tr>
                 </tbody>
@@ -99,32 +116,107 @@ import { DecimalPipe } from '@angular/common';
           </div>
         </div>
       </div>
+
+      <div *ngIf="barChartData.labels.length" class="mt-8 bg-white rounded-lg shadow-lg p-6">
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-gray-800">Top 5 Clientes por Gasto</h3>
+        </div>
+
+        <div class="relative h-80 mb-8">
+          <canvas baseChart
+            [data]="barChartData"
+            [type]="barChartType"
+            [options]="chartOptions">
+          </canvas>
+        </div>
+
+        <div class="space-y-2">
+          <div *ngFor="let customer of topCustomers">
+            <p class="text-sm">
+              {{ customer.user?.email }} - {{ customer.totalSpent | number:'1.2-2' }}€
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-  `
+  `,
+  providers: [DecimalPipe]
 })
 export class AdminOrdersComponent implements OnInit {
   orders: Order[] = [];
   selectedOrder: Order | null = null;
   private apiUrl = 'http://localhost:3000/api/admin/orders';
+  topCustomer: any = null;
+  barChartData: any = {
+    labels: [],
+    datasets: []
+  };
+  barChartType: ChartType = 'bar';
+  topCustomers: any[] = [];
 
   estadoMap: any = {
     pending: 'Pendiente',
-    processing: 'En proceso',
     shipped: 'Enviado',
     delivered: 'Entregado',
     cancelled: 'Cancelado'
   };
 
-  constructor(private http: HttpClient) {}
+  chartOptions: ChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      y: {
+        type: 'linear' as const,
+        beginAtZero: true,
+        ticks: {
+          callback: function(tickValue: number | string) {
+            return typeof tickValue === 'number' ? tickValue + '€' : tickValue;
+          }
+        }
+      }
+    }
+  };
+
+  constructor(private http: HttpClient, private adminService: AdminService, private decimalPipe: DecimalPipe) {}
 
   ngOnInit() {
     this.loadOrders();
+    this.loadTopCustomersBySpent();
   }
 
   loadOrders() {
     this.http.get<Order[]>(this.apiUrl).subscribe({
       next: (orders) => this.orders = orders,
       error: (error) => console.error('Error cargando pedidos:', error)
+    });
+  }
+
+  loadTopCustomersBySpent() {
+    const barColors = [
+      '#FF6384', // rojo
+      '#36A2EB', // azul
+      '#FFCE56', // amarillo
+      '#4BC0C0', // verde agua
+      '#9966FF'  // morado
+    ];
+
+    this.adminService.getTopCustomersBySpent().subscribe(data => {
+      this.topCustomers = data;
+      this.barChartData = {
+        labels: data.map(d => d.user?.name || 'Desconocido'),
+        datasets: [
+          {
+            data: data.map(d => d.totalSpent),
+            label: 'Total gastado (€)',
+            backgroundColor: barColors.slice(0, data.length)
+          }
+        ]
+      };
     });
   }
 

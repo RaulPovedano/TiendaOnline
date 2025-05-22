@@ -1,9 +1,11 @@
 import express from 'express';
-import { createPaymentIntent } from '../controllers/payment.controller.js';
-import { authMiddleware } from '../middleware/auth.middleware.js';
+import { createPaymentIntent, handleWebhook } from '../controllers/payment.controller.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/create-payment-intent', authMiddleware, createPaymentIntent);
+// Rutas de Stripe
+router.post('/stripe/create-payment-intent', authenticateToken, createPaymentIntent);
+router.post('/stripe/webhook', express.raw({type: 'application/json'}), handleWebhook);
 
 export default router; 

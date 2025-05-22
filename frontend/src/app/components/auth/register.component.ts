@@ -9,33 +9,27 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div class="max-w-md w-full space-y-8">
         <div>
-          <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Crear cuenta
+          <h2 class="text-center text-3xl font-bold text-gray-900">
+            Registro
           </h2>
         </div>
         <form class="mt-8 space-y-6" (ngSubmit)="onSubmit()">
           <div class="rounded-md shadow-sm -space-y-px">
             <div>
-              <label for="name" class="sr-only">Nombre</label>
-              <input id="name" name="name" type="text" required
-                [(ngModel)]="user.name"
+              <input type="text" [(ngModel)]="user.name" name="name" required
                 class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Nombre completo">
+                placeholder="Nombre">
             </div>
             <div>
-              <label for="email" class="sr-only">Email</label>
-              <input id="email" name="email" type="email" required
-                [(ngModel)]="user.email"
+              <input type="email" [(ngModel)]="user.email" name="email" required
                 class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email">
             </div>
             <div>
-              <label for="password" class="sr-only">Contraseña</label>
-              <input id="password" name="password" type="password" required
-                [(ngModel)]="user.password"
+              <input type="password" [(ngModel)]="user.password" name="password" required
                 class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Contraseña">
             </div>
@@ -69,23 +63,16 @@ export class RegisterComponent {
     password: '',
     role: 'ROLE_USER' as const
   };
-  error: string = '';
+  error = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private auth: AuthService, private router: Router) {}
 
   onSubmit() {
     this.error = '';
-    this.authService.register(this.user)
+    this.auth.register(this.user)
       .subscribe({
-        next: () => {
-          this.router.navigate(['/']);
-        },
-        error: (err) => {
-          this.error = 'Error al registrar. Por favor, intenta con otro email.';
-        }
+        next: () => this.router.navigate(['/']),
+        error: () => this.error = 'Error al registrar'
       });
   }
 }

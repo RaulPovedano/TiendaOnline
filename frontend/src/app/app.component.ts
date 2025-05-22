@@ -5,6 +5,7 @@ import { AuthService } from './services/auth.service';
 import { CartService } from './services/cart.service';
 import { Router } from '@angular/router';
 import { CartCountPipe } from './pipes/cart-count.pipe';
+import { ScrollService } from './services/scroll.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,8 @@ export class AppComponent {
   constructor(
     public authService: AuthService,
     public cartService: CartService,
-    private router: Router
+    private router: Router,
+    private scrollService: ScrollService
   ) {}
 
   logout() {

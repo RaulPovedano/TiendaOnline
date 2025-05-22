@@ -1,19 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { CartService } from '../../services/cart.service';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Cart } from '../../models/cart.model';
-import { PaymentService } from '../../services/payment.service';
 import { firstValueFrom } from 'rxjs';
+import { StripeService } from '../../services/stripe.service';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DecimalPipe],
+  imports: [CommonModule, FormsModule, DecimalPipe],
   template: `
     <div class="container mx-auto p-4">
       <h2 class="text-2xl font-bold mb-6">Finalizar Compra</h2>
@@ -105,102 +104,34 @@ import { firstValueFrom } from 'rxjs';
                        [(ngModel)]="paymentMethod" 
                        name="paymentMethod" 
                        value="credit_card"
+                       (change)="onPaymentMethodChange()"
                        class="mr-2">
                 Tarjeta de Crédito
               </label>
-              <label class="block">
-                <input type="radio" 
-                       [(ngModel)]="paymentMethod" 
-                       name="paymentMethod" 
-                       value="paypal"
-                       class="mr-2">
-                PayPal
-              </label>
-              <label class="block">
-                <input type="radio" 
-                       [(ngModel)]="paymentMethod" 
-                       name="paymentMethod" 
-                       value="test_mode"
-                       class="mr-2">
-                Modo de Prueba
-              </label>
             </div>
           </div>
 
-          <!-- Campos específicos según método de pago -->
-          <div class="mt-4" *ngIf="paymentMethod === 'credit_card'">
-            <h4 class="font-semibold mb-3">Datos de la Tarjeta</h4>
-            <div class="space-y-3">
-              <div>
-                <label class="block text-gray-700 mb-1">Nombre en la Tarjeta</label>
-                <input type="text" 
-                       [(ngModel)]="paymentData.creditCard.name" 
-                       name="cardName"
-                       required
-                       class="w-full px-3 py-2 border rounded-lg">
-              </div>
-              <div>
-                <label class="block text-gray-700 mb-1">Número de Tarjeta</label>
-                <input type="text" 
-                       [(ngModel)]="paymentData.creditCard.number" 
-                       name="cardNumber"
-                       required
-                       maxlength="16"
-                       pattern="[0-9]*"
-                       placeholder="1234 5678 9012 3456"
-                       class="w-full px-3 py-2 border rounded-lg">
-              </div>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-gray-700 mb-1">Fecha de Expiración</label>
-                  <input type="text" 
-                         [(ngModel)]="paymentData.creditCard.expiry" 
-                         name="cardExpiry"
-                         required
-                         maxlength="5"
-                         placeholder="MM/YY"
-                         class="w-full px-3 py-2 border rounded-lg">
-                </div>
-                <div>
-                  <label class="block text-gray-700 mb-1">CVV</label>
-                  <input type="text" 
-                         [(ngModel)]="paymentData.creditCard.cvv" 
-                         name="cardCvv"
-                         required
-                         maxlength="4"
-                         pattern="[0-9]*"
-                         placeholder="123"
-                         class="w-full px-3 py-2 border rounded-lg">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-4" *ngIf="paymentMethod === 'paypal'">
-            <h4 class="font-semibold mb-3">Datos de PayPal</h4>
-            <div>
-              <label class="block text-gray-700 mb-1">Email de PayPal</label>
-              <input type="email" 
-                     [(ngModel)]="paymentData.paypal.email" 
-                     name="paypalEmail"
-                     class="w-full px-3 py-2 border rounded-lg">
-            </div>
+          <!-- Elemento de Stripe -->
+          <div *ngIf="paymentMethod === 'credit_card'" class="mt-4">
+            <div id="card-element" class="w-full px-3 py-2 border rounded-lg"></div>
+            <div id="card-errors" class="text-red-500 mt-2" role="alert"></div>
           </div>
 
           <button (click)="processOrder()"
-                  [disabled]="!isFormValid()"
+                  [disabled]="!isFormValid() || isProcessing"
                   class="mt-6 w-full bg-green-500 text-white py-2 px-4 rounded-lg 
                          hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed">
-            Confirmar Pedido
+            {{ isProcessing ? 'Procesando...' : 'Confirmar Pedido' }}
           </button>
         </div>
       </div>
     </div>
   `
 })
-export class CheckoutComponent implements OnInit {
+export class CheckoutComponent implements OnInit, OnDestroy {
   cart$: Observable<Cart | null>;
   paymentMethod: string = '';
+  isProcessing = false;
   shippingData = {
     fullName: '',
     address: '',
@@ -208,40 +139,49 @@ export class CheckoutComponent implements OnInit {
     postalCode: '',
     phone: ''
   };
-  paymentData = {
-    creditCard: {
-      number: '',
-      name: '',
-      expiry: '',
-      cvv: ''
-    },
-    paypal: {
-      email: ''
-    }
-  };
-  private stripe: any;
-  private elements: any;
-  cardElement: any;
+  errorMessage: string | null = null;
 
   constructor(
     public cartService: CartService,
     private router: Router,
-    private paymentService: PaymentService
+    private stripeService: StripeService
   ) {
     this.cart$ = this.cartService.cart$;
-    this.initializeStripe();
   }
 
-  async initializeStripe() {
-    this.stripe = await this.paymentService.initializeStripe();
-    if (this.stripe) {
-      this.elements = this.stripe.elements();
-      this.cardElement = this.elements.create('card');
-      this.cardElement.mount('#card-element');
+  async ngOnInit() {
+    // No inicializamos Stripe aquí, lo haremos cuando se seleccione el método de pago
+  }
+
+  async onPaymentMethodChange() {
+    if (this.paymentMethod === 'credit_card') {
+      try {
+        // Esperar a que el elemento esté en el DOM
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Verificar que el elemento existe
+        const cardElement = document.getElementById('card-element');
+        if (!cardElement) {
+          throw new Error('No se encontró el elemento para la tarjeta');
+        }
+
+        await this.stripeService.initializeCardElement('card-element');
+      } catch (error) {
+        console.error('Error initializing card:', error);
+        this.errorMessage = 'Error al inicializar el formulario de pago';
+      }
     }
   }
 
-  ngOnInit() {}
+  ngOnDestroy() {
+    if (this.paymentMethod === 'credit_card') {
+      this.stripeService.cleanup();
+    }
+  }
+
+  getProductImage(item: any): string {
+    return item.productId?.img || '';
+  }
 
   getProductName(item: any): string {
     return item.productId?.name || '';
@@ -249,10 +189,6 @@ export class CheckoutComponent implements OnInit {
 
   getProductPrice(item: any): number {
     return item.productId?.price || 0;
-  }
-
-  getProductImage(item: any): string {
-    return item.productId?.img || '';
   }
 
   getTotal(cart: any): number {
@@ -263,55 +199,19 @@ export class CheckoutComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    const baseValidation = !!(
+    return !!(
       this.shippingData.fullName &&
+      this.shippingData.fullName.trim() !== '' &&
       this.shippingData.address &&
+      this.shippingData.address.trim() !== '' &&
       this.shippingData.city &&
+      this.shippingData.city.trim() !== '' &&
       this.shippingData.postalCode &&
+      this.shippingData.postalCode.trim() !== '' &&
       this.shippingData.phone &&
-      this.paymentMethod
+      this.shippingData.phone.trim() !== '' &&
+      this.paymentMethod === 'credit_card'
     );
-
-    if (!baseValidation) return false;
-
-    switch (this.paymentMethod) {
-      case 'credit_card':
-        return !!(
-          this.paymentData.creditCard.name &&
-          this.paymentData.creditCard.number &&
-          this.paymentData.creditCard.number.length === 16 &&
-          this.paymentData.creditCard.expiry &&
-          this.validateExpiryDate(this.paymentData.creditCard.expiry) &&
-          this.paymentData.creditCard.cvv &&
-          this.paymentData.creditCard.cvv.length >= 3
-        );
-      case 'paypal':
-        return !!this.paymentData.paypal.email;
-      case 'test_mode':
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  private validateExpiryDate(expiry: string): boolean {
-    if (!expiry || expiry.length !== 5) return false;
-    
-    const [month, year] = expiry.split('/');
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear() % 100;
-    const currentMonth = currentDate.getMonth() + 1;
-    
-    const expiryMonth = parseInt(month);
-    const expiryYear = parseInt(year);
-
-    if (isNaN(expiryMonth) || isNaN(expiryYear)) return false;
-    if (expiryMonth < 1 || expiryMonth > 12) return false;
-    
-    if (expiryYear < currentYear) return false;
-    if (expiryYear === currentYear && expiryMonth < currentMonth) return false;
-    
-    return true;
   }
 
   async processOrder() {
@@ -320,72 +220,54 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    this.isProcessing = true;
+
     try {
-      if (this.paymentMethod === 'credit_card') {
-        const cart = await firstValueFrom(this.cart$);
-        const total = this.getTotal(cart);
-
-        // Crear PaymentIntent
-        const { clientSecret } = await firstValueFrom(
-          this.paymentService.createPaymentIntent(total, this.paymentMethod)
-        );
-
-        // Confirmar el pago con los datos de la tarjeta
-        const result = await this.stripe.confirmCardPayment(clientSecret, {
-          payment_method: {
-            card: {
-              number: this.paymentData.creditCard.number,
-              exp_month: parseInt(this.paymentData.creditCard.expiry.split('/')[0]),
-              exp_year: parseInt('20' + this.paymentData.creditCard.expiry.split('/')[1]),
-              cvc: this.paymentData.creditCard.cvv
-            },
-            billing_details: {
-              name: this.paymentData.creditCard.name
-            }
-          }
-        });
-
-        if (result.error) {
-          throw new Error(result.error.message);
-        }
-
-        if (result.paymentIntent.status === 'succeeded') {
-          this.completeOrder();
-        }
-      } else {
-        this.completeOrder();
+      const cart = await firstValueFrom(this.cart$);
+      if (!cart || !cart.items || cart.items.length === 0) {
+        throw new Error('No hay productos en el carrito');
       }
+
+      const total = this.getTotal(cart);
+      if (total <= 0) {
+        throw new Error('El total del carrito debe ser mayor que 0');
+      }
+
+      // Preparar los datos de envío
+      const shippingData = {
+        fullName: this.shippingData.fullName.trim(),
+        address: this.shippingData.address.trim(),
+        city: this.shippingData.city.trim(),
+        postalCode: this.shippingData.postalCode.trim(),
+        phone: this.shippingData.phone.trim()
+      };
+
+      // Crear la orden primero
+      const response = await firstValueFrom(
+        this.cartService.checkout({
+          shippingData,
+          paymentMethod: 'credit_card'
+        })
+      );
+
+      if (!response || !response.order || !response.order._id) {
+        throw new Error('No se pudo crear la orden');
+      }
+
+      // Procesar el pago con Stripe
+      const paymentResult = await this.stripeService.processPayment(total, response.order._id);
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || 'Error al procesar el pago');
+      }
+
+      alert('¡Pedido realizado con éxito!');
+      this.router.navigate(['/']);
     } catch (error) {
-      console.error('Error al procesar el pago:', error);
-      // Manejo de errores mejorado
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Error desconocido al procesar el pago';
-      alert('Error al procesar el pago: ' + errorMessage);
+      console.error('Error al procesar el pedido:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert('Error al procesar el pedido: ' + errorMessage);
+    } finally {
+      this.isProcessing = false;
     }
-  }
-
-  private completeOrder() {
-    this.cartService.checkout({
-      shippingData: this.shippingData,
-      paymentMethod: this.paymentMethod,
-      paymentDetails: this.paymentMethod === 'credit_card' 
-        ? { name: this.paymentData.creditCard.name }
-        : this.paymentMethod === 'paypal'
-          ? { email: this.paymentData.paypal.email }
-          : {}
-    }).subscribe({
-      next: () => {
-        alert('¡Pedido realizado con éxito!');
-        this.router.navigate(['/']);
-      },
-      error: (error) => {
-        console.error('Error al procesar el pedido:', error);
-        const errorMessage = error instanceof Error 
-          ? error.message 
-          : 'Error desconocido al procesar el pedido';
-        alert('Error al procesar el pedido: ' + errorMessage);
-      }
-    });
   }
 } 

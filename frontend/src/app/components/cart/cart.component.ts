@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="container mx-auto p-4">
-      <h2 class="text-2xl font-bold mb-4">Carrito de Compras</h2>
+      <h2 class="text-2xl font-bold mb-4">Carrito</h2>
       
       <ng-container *ngIf="cartService.cart$ | async as cart">
         <ng-container *ngIf="cart?.items && cart.items.length > 0; else emptyCart">
@@ -20,14 +20,11 @@ import { Router } from '@angular/router';
               <div class="flex items-center">
                 <img [src]="getProductImage(item)" 
                      [alt]="getProductName(item)"
-                     class="w-24 h-24 object-cover rounded-lg shadow-sm">
+                     class="w-24 h-24 object-cover rounded-lg">
                 <div class="ml-4">
                   <h3 class="text-lg font-semibold">{{ getProductName(item) }}</h3>
-                  <p class="text-gray-600 font-medium">
+                  <p class="text-gray-600">
                     Precio: {{ getProductPrice(item) | number:'1.2-2' }}€
-                  </p>
-                  <p class="text-sm text-gray-500">
-                    Subtotal: {{ (getProductPrice(item) * item.quantity) | number:'1.2-2' }}€
                   </p>
                 </div>
               </div>
@@ -48,7 +45,6 @@ import { Router } from '@angular/router';
                 
                 <button (click)="removeFromCart(getProductId(item))"
                         class="ml-4 text-red-500 hover:text-red-700">
-                  <span class="sr-only">Eliminar</span>
                   ×
                 </button>
               </div>
@@ -60,7 +56,7 @@ import { Router } from '@angular/router';
               </div>
               <button (click)="checkout()"
                       class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600">
-                Realizar Pedido
+                Comprar
               </button>
             </div>
           </div>
@@ -68,10 +64,10 @@ import { Router } from '@angular/router';
         
         <ng-template #emptyCart>
           <div class="text-center py-8">
-            <p class="text-gray-600">Tu carrito está vacío</p>
+            <p class="text-gray-600">El carrito está vacío</p>
             <a routerLink="/" 
                class="inline-block mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-              Continuar comprando
+              Ver productos
             </a>
           </div>
         </ng-template>
@@ -90,15 +86,11 @@ export class CartComponent implements OnInit {
       return;
     }
 
-    this.cartService.updateQuantity(productId, newQuantity).subscribe({
-      error: (error) => console.error('Error al actualizar cantidad:', error)
-    });
+    this.cartService.updateQuantity(productId, newQuantity).subscribe();
   }
 
   removeFromCart(productId: string) {
-    this.cartService.removeFromCart(productId).subscribe({
-      error: (error) => console.error('Error al eliminar producto:', error)
-    });
+    this.cartService.removeFromCart(productId).subscribe();
   }
 
   getTotal(cart: Cart): number {

@@ -20,7 +20,7 @@ export interface Order {
   };
   items: OrderItem[];
   total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pendiente' | 'procesando' | 'enviado' | 'entregado' | 'cancelado';
   shippingData?: {
     address: string;
     city: string;

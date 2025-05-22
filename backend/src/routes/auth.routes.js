@@ -9,4 +9,14 @@ router.post("/register", register);
 router.post("/login", login);
 router.put("/profile", authenticateToken, updateUser);
 
-export const authRoutes = router;
+// Ruta GET /profile autenticada
+router.get('/profile', authenticateToken, async (req, res) => {
+  try {
+    const user = req.user.toJSON();
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el perfil' });
+  }
+});
+
+export default router;

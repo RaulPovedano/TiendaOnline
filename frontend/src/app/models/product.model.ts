@@ -1,10 +1,10 @@
 export interface Product {
-  _id: string;
+  _id?: string;
   name: string;
   description: string;
   price: number;
-  img: string;
   stock: number;
-  createdAt: Date;
-  updatedAt: Date;
+  img: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 } 

@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Product } from '../../models/product.model';
 import { DecimalPipe } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-products',
@@ -13,9 +15,33 @@ import { DecimalPipe } from '@angular/common';
     <div class="container mx-auto p-4">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Administrar Productos</h2>
-        <button (click)="createNewProduct()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-          Añadir Producto
-        </button>
+        <div class="space-x-4">
+          <button (click)="createNewProduct()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+            Añadir Producto
+          </button>
+          <button (click)="showCsvUpload = !showCsvUpload" 
+                  class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            {{ showCsvUpload ? 'Cancelar' : 'Subir CSV' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Subir CSV -->
+      <div *ngIf="showCsvUpload" class="bg-white p-4 rounded-lg shadow mb-6">
+        <h3 class="text-lg font-bold mb-4">Subir Productos (CSV)</h3>
+        <div class="space-y-4">
+          <input type="file" (change)="onFileSelected($event)" 
+                 accept=".csv"
+                 class="w-full p-2 border rounded">
+          <button (click)="uploadCSV()" 
+                  [disabled]="!selectedFile"
+                  class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-300">
+            Subir CSV
+          </button>
+          <p class="text-sm text-gray-600">
+            El CSV debe tener las columnas: name,description,price,stock,img
+          </p>
+        </div>
       </div>
       
       <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -41,7 +67,7 @@ import { DecimalPipe } from '@angular/common';
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.stock }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button (click)="editProduct(product)" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</button>
-                <button (click)="deleteProduct(product._id)" class="text-red-600 hover:text-red-900">Eliminar</button>
+                <button (click)="deleteProduct(product._id || '')" class="text-red-600 hover:text-red-900">Eliminar</button>
               </td>
             </tr>
           </tbody>
@@ -90,31 +116,51 @@ import { DecimalPipe } from '@angular/common';
 export class AdminProductsComponent implements OnInit {
   products: Product[] = [];
   editingProduct: Product | null = null;
+  selectedFile: File | null = null;
+  showCsvUpload = false;
   private apiUrl = 'http://localhost:3000/api/admin/products';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
-    this.loadProducts();
+    this.authService.getCurrentUser().subscribe({
+      next: (user) => {
+        if (user?.role !== 'ROLE_ADMIN') {
+          this.router.navigate(['/']);
+          return;
+        }
+        this.loadProducts();
+      },
+      error: (error) => {
+        console.error('Error verificando permisos:', error);
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   loadProducts() {
     this.http.get<Product[]>(this.apiUrl).subscribe({
       next: (products) => this.products = products,
-      error: (error) => console.error('Error cargando productos:', error)
+      error: (error) => {
+        console.error('Error cargando productos:', error);
+        if (error.status === 403) {
+          this.router.navigate(['/login']);
+        }
+      }
     });
   }
 
   createNewProduct() {
     this.editingProduct = {
-      _id: '',
       name: '',
       description: '',
       price: 0,
       stock: 0,
-      img: '',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      img: ''
     };
   }
 
@@ -139,7 +185,12 @@ export class AdminProductsComponent implements OnInit {
           }
           this.editingProduct = null;
         },
-        error: (error) => console.error('Error actualizando producto:', error)
+        error: (error) => {
+          console.error('Error actualizando producto:', error);
+          if (error.status === 403) {
+            this.router.navigate(['/login']);
+          }
+        }
       });
     } else {
       // Crear nuevo producto
@@ -148,7 +199,12 @@ export class AdminProductsComponent implements OnInit {
           this.products.push(newProduct);
           this.editingProduct = null;
         },
-        error: (error) => console.error('Error creando producto:', error)
+        error: (error) => {
+          console.error('Error creando producto:', error);
+          if (error.status === 403) {
+            this.router.navigate(['/login']);
+          }
+        }
       });
     }
   }
@@ -159,8 +215,42 @@ export class AdminProductsComponent implements OnInit {
         next: () => {
           this.products = this.products.filter(p => p._id !== productId);
         },
-        error: (error) => console.error('Error eliminando producto:', error)
+        error: (error) => {
+          console.error('Error eliminando producto:', error);
+          if (error.status === 403) {
+            this.router.navigate(['/login']);
+          }
+        }
       });
     }
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  uploadCSV() {
+    if (!this.selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.http.post<{message: string, count: number}>(`${this.apiUrl}/upload`, formData).subscribe({
+      next: (response) => {
+        console.log(response.message, response.count);
+        this.loadProducts();
+        this.selectedFile = null;
+        this.showCsvUpload = false;
+      },
+      error: (error) => {
+        console.error('Error subiendo CSV:', error);
+        if (error.status === 403) {
+          this.router.navigate(['/login']);
+        }
+      }
+    });
   }
 } 

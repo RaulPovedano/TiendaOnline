@@ -1,25 +1,49 @@
 import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { User, AuthResponse } from '../models/user.model';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private userSubject = new BehaviorSubject<User | null>(null);
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  private userRoleSubject = new BehaviorSubject<string>('');
   user$ = this.userSubject.asObservable();
 
   constructor(
     private http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private router: Router
   ) {
     if (isPlatformBrowser(this.platformId)) {
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        this.userSubject.next(JSON.parse(savedUser));
+      this.loadStoredUser();
+      // Verificar si hay un token al iniciar el servicio
+      const token = localStorage.getItem('token');
+      if (token) {
+        this.isAuthenticatedSubject.next(true);
+        // Decodificar el token para obtener el rol
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          this.userRoleSubject.next(payload.role);
+        } catch (error) {
+          console.error('Error decoding token:', error);
+          this.logout();
+        }
+      }
+    }
+  }
+
+  private loadStoredUser() {
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        this.userSubject.next(JSON.parse(storedUser));
       }
     }
   }
@@ -33,6 +57,10 @@ export class AuthService {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
           this.userSubject.next(response.user);
+          this.isAuthenticatedSubject.next(true);
+          // Decodificar el token para obtener el rol
+          const payload = JSON.parse(atob(response.token.split('.')[1]));
+          this.userRoleSubject.next(payload.role);
         })
       );
   }
@@ -46,6 +74,10 @@ export class AuthService {
             localStorage.setItem('user', JSON.stringify(response.user));
           }
           this.userSubject.next(response.user);
+          this.isAuthenticatedSubject.next(true);
+          // Decodificar el token para obtener el rol
+          const payload = JSON.parse(atob(response.token.split('.')[1]));
+          this.userRoleSubject.next(payload.role);
         })
       );
   }
@@ -56,6 +88,9 @@ export class AuthService {
       localStorage.removeItem('user');
     }
     this.userSubject.next(null);
+    this.isAuthenticatedSubject.next(false);
+    this.userRoleSubject.next('');
+    this.router.navigate(['/login']);
   }
 
   isLoggedIn(): boolean {
@@ -79,12 +114,17 @@ export class AuthService {
     this.userSubject.next(user);
   }
 
-  isAdmin(): boolean {
-    const user = this.userSubject.value;
-    return user?.role === 'ROLE_ADMIN';
+  isAdmin(): Observable<boolean> {
+    return this.userRoleSubject.asObservable().pipe(
+      map(role => role === 'ROLE_ADMIN')
+    );
   }
 
-  updateProfile(userId: string, userData: Partial<User>): Observable<User> {
+  getCurrentUser(): Observable<User | null> {
+    return this.user$;
+  }
+
+  updateProfile(userData: Partial<User>): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/profile`, userData)
       .pipe(
         tap(updatedUser => {
@@ -94,5 +134,15 @@ export class AuthService {
           this.userSubject.next(updatedUser);
         })
       );
+  }
+
+  isAuthenticated(): Observable<boolean> {
+    return this.isAuthenticatedSubject.asObservable();
+  }
+
+  isAdminObservable(): Observable<boolean> {
+    return this.userRoleSubject.asObservable().pipe(
+      map(role => role === 'ROLE_ADMIN')
+    );
   }
 } 
