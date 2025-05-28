@@ -177,47 +177,149 @@
   }
 </style>
 
-<header class="bg-white shadow-sm">
-  <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-    <h1 class="text-xl font-bold">
-      <a routerLink="/" class="text-gray-900 hover:text-gray-700">Mi Tienda Online</a>
-    </h1>
-    <div class="flex gap-4 items-center">
-      <a routerLink="/cart" class="text-gray-600 hover:text-gray-900 relative">
-        Carrito
-        <ng-container *ngIf="(cartService.cart$ | async) as cart">
-          <span *ngIf="(cart | cartCount) > 0" 
-                class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {{cart | cartCount}}
-          </span>
-        </ng-container>
-      </a>
-      <ng-container *ngIf="!(authService.user$ | async); else userMenu">
-        <a routerLink="/login" class="text-gray-600 hover:text-gray-900">
-          Iniciar Sesión
+<header class="bg-gray-900 text-white shadow-sm sticky top-0 z-50">
+  <nav class="container mx-auto px-4 py-4">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-8">
+        <a routerLink="/" class="flex items-center space-x-2">
+          <i class="fas fa-shopping-bag text-2xl text-white"></i>
+          <span class="text-xl font-bold text-white hover:text-gray-300 transition-colors">Mi Tienda Online</span>
         </a>
-      </ng-container>
-      <ng-template #userMenu>
-        <div class="relative flex gap-4">
-          <a routerLink="/profile" class="text-gray-600 hover:text-gray-900">
-            Mi Perfil
-          </a>
-          <button (click)="logout()" class="text-gray-600 hover:text-gray-900">
-            Cerrar Sesión
-          </button>
+        
+        <button (click)="toggleMobileMenu()" class="md:hidden text-white hover:text-gray-300 focus:outline-none">
+          <i class="fas" [class.fa-bars]="!isMobileMenuOpen" [class.fa-times]="isMobileMenuOpen"></i>
+        </button>
+       
+        <div class="hidden md:flex space-x-6">
+          <a routerLink="/products" class="text-white hover:text-gray-300 transition-colors">Productos</a>
+          <a routerLink="/about" class="text-white hover:text-gray-300 transition-colors">Sobre Nosotros</a>
+          <a routerLink="/contact" class="text-white hover:text-gray-300 transition-colors">Contacto</a>
         </div>
-      </ng-template>
+      </div>
+      
+      <div class="flex items-center space-x-4 md:space-x-6">
+        <a routerLink="/cart" class="relative flex items-center space-x-2 text-white hover:text-gray-300 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <ng-container *ngIf="(cartService.cart$ | async) as cart">
+            <span *ngIf="(cart | cartCount) > 0" 
+                  class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {{cart | cartCount}}
+            </span>
+          </ng-container>
+        </a>
+        
+        <ng-container *ngIf="!(authService.user$ | async); else userMenu">
+          <a routerLink="/login" 
+             class="bg-white text-gray-900 px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm md:text-base">
+            Iniciar Sesión
+          </a>
+        </ng-container>
+        
+        <ng-template #userMenu>
+          <div class="relative group">
+            <button class="flex items-center space-x-2 text-white hover:text-gray-300 transition-colors">
+              <i class="fas fa-user-circle text-xl"></i>
+              <span class="hidden md:inline">Mi Cuenta</span>
+              <i class="fas fa-chevron-down text-xs ml-1 transition-transform group-hover:rotate-180"></i>
+            </button>
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right scale-95 group-hover:scale-100">
+              <a routerLink="/profile" class="block px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-600 transition-colors">
+                <i class="fas fa-user mr-2"></i>
+                Mi Perfil
+              </a>
+              <button (click)="logout()" class="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-blue-600 transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+    
+    <div [class.hidden]="!isMobileMenuOpen" class="md:hidden mt-4 pb-4">
+      <div class="flex flex-col space-y-4">
+        <a routerLink="/products" class="text-white hover:text-gray-300 transition-colors">Productos</a>
+        <a routerLink="/about" class="text-white hover:text-gray-300 transition-colors">Sobre Nosotros</a>
+        <a routerLink="/contact" class="text-white hover:text-gray-300 transition-colors">Contacto</a>
+      </div>
     </div>
   </nav>
 </header>
 
-<main>
-  <router-outlet></router-outlet>
+<main class="min-h-screen bg-gray-50 px-4 md:px-6 lg:px-8">
+  <div class="container mx-auto py-6">
+    <router-outlet></router-outlet>
+  </div>
 </main>
 
-<footer class="bg-gray-100 mt-8">
-  <div class="container mx-auto px-4 py-6 text-center text-gray-600">
-    <p>© 2024 Mi Tienda Online. Todos los derechos reservados.</p>
+<footer class="bg-gray-900 text-white">
+  <div class="container mx-auto px-4 py-8 md:py-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="text-xl font-bold mb-4">Mi Tienda Online</h3>
+        <p class="text-gray-400">Tu destino para compras en línea de calidad. Encuentra los mejores productos al mejor precio.</p>
+      </div>
+      
+      <div>
+        <h4 class="text-lg font-semibold mb-4">Enlaces Rápidos</h4>
+        <ul class="space-y-2">
+          <li><a routerLink="/products" class="text-gray-400 hover:text-white transition-colors">Productos</a></li>
+          <li><a routerLink="/about" class="text-gray-400 hover:text-white transition-colors">Sobre Nosotros</a></li>
+          <li><a routerLink="/contact" class="text-gray-400 hover:text-white transition-colors">Contacto</a></li>
+        </ul>
+      </div>
+      
+      <div>
+        <h4 class="text-lg font-semibold mb-4">Mi Cuenta</h4>
+        <ul class="space-y-2">
+          <li><a routerLink="/profile" class="text-gray-400 hover:text-white transition-colors">Mi Perfil</a></li>
+          <li><a routerLink="/cart" class="text-gray-400 hover:text-white transition-colors">Carrito</a></li>
+        </ul>
+      </div>
+      
+      <div>
+        <h4 class="text-lg font-semibold mb-4">Contacto</h4>
+        <ul class="space-y-2">
+          <li class="flex items-center space-x-2">
+            <i class="fas fa-envelope text-gray-400"></i>
+            <span class="text-gray-400">info&#64;mitiendaonline.com</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <i class="fas fa-phone text-gray-400"></i>
+            <span class="text-gray-400">+34 123 456 789</span>
+          </li>
+          <li class="flex items-center space-x-2">
+            <i class="fas fa-map-marker-alt text-gray-400"></i>
+            <span class="text-gray-400">Calle Principal, 123</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="border-t border-gray-800 mt-12 pt-8">
+      <div class="flex flex-col items-center">
+        <p class="text-gray-400 text-center">© 2024 Mi Tienda Online. Todos los derechos reservados.</p>
+        <div class="flex flex-col items-center mt-8">
+          <div class="flex space-x-6 mb-4">
+            <a href="https://www.facebook.com/profile.php?id=100094502201123" target="_blank" class="text-gray-400 hover:text-blue-600 transition-colors">
+              <i class="fab fa-facebook-f text-2xl"></i>
+            </a>
+            <a href="https://www.instagram.com/__.raulpr__" target="_blank" class="text-gray-400 hover:text-blue-600 transition-colors">
+              <i class="fab fa-instagram text-2xl"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/raul-povedano-72b12023a" target="_blank" class="text-gray-400 hover:text-blue-600 transition-colors">
+              <i class="fab fa-linkedin-in text-2xl"></i>
+            </a>
+            <a href="https://github.com/RaulPovedano" target="_blank" class="text-gray-400 hover:text-blue-600 transition-colors">
+              <i class="fab fa-github text-2xl"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </footer>
 

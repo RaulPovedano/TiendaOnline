@@ -1,7 +1,7 @@
 # Backend API con Node.js, MongoDB y JWT
 
 ## Descripción
-Backend basado en Node.js y MongoDB que proporciona autenticación de usuarios y gestión de productos mediante una API RESTful. Utiliza JWT (JSON Web Tokens) para la autenticación y Docker para su despliegue.
+Backend basado en Node.js y MongoDB que proporciona una API completa para una tienda online. Incluye autenticación de usuarios, gestión de productos, carrito de compras y gestión de pedidos. Utiliza JWT (JSON Web Tokens) para la autenticación y Docker para su despliegue.
 
 ## Requisitos Previos
 - Docker y Docker Compose instalados
@@ -15,6 +15,8 @@ Backend basado en Node.js y MongoDB que proporciona autenticación de usuarios y
 PORT=3000
 MONGODB_URI=mongodb://admin:hlanz@mongodb:27017/db_apis?authSource=admin
 JWT_SECRET=your_jwt_secret_key
+STRIPE_SECRET_KEY=sk_test_7665789......
+STRIPE_PUBLISHABLE_KEY=pk_test_6568288.....
 ```
 
 3. Ejecuta los contenedores:
@@ -41,13 +43,20 @@ Body:
 ```json
 {
     "email": "usuario@ejemplo.com",
-    "password": "tucontraseña"
+    "password": "tucontraseña",
+    "name": "Nombre Usuario"
 }
 ```
 Respuesta (201 Created):
 ```json
 {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+    "token": "eyJhbGciOiJIUzI1NiIsInR5...",
+    "user": {
+        "id": "user_id",
+        "email": "usuario@ejemplo.com",
+        "name": "Nombre Usuario",
+        "role": "ROLE_USER"
+    }
 }
 ```
 
@@ -65,7 +74,13 @@ Body:
 Respuesta (200 OK):
 ```json
 {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5..."
+    "token": "eyJhbGciOiJIUzI1NiIsInR5...",
+    "user": {
+        "id": "user_id",
+        "email": "usuario@ejemplo.com",
+        "name": "Nombre Usuario",
+        "role": "ROLE_USER"
+    }
 }
 ```
 
@@ -76,14 +91,19 @@ Respuesta (200 OK):
 GET /api/products
 ```
 
+#### Buscar Productos (Público)
+```http
+GET /api/products/search?name=nombre_producto
+```
+
 #### Obtener un Producto (Público)
 ```http
 GET /api/products/:id
 ```
 
-#### Crear Producto (Protegido)
+#### Crear Producto (Admin)
 ```http
-POST /api/products
+POST /api/admin/products
 ```
 Headers:
 ```
@@ -95,13 +115,14 @@ Body:
     "name": "Nombre Producto",
     "description": "Descripción del producto",
     "price": 99.99,
-    "stock": 100
+    "stock": 100,
+    "img": "url_imagen"
 }
 ```
 
-#### Actualizar Producto (Protegido)
+#### Actualizar Producto (Admin)
 ```http
-PUT /api/products/:id
+PUT /api/admin/products/:id
 ```
 Headers:
 ```
@@ -111,46 +132,139 @@ Body:
 ```json
 {
     "name": "Nuevo Nombre",
-    "price": 149.99
+    "price": 149.99,
+    "stock": 50
 }
 ```
 
-#### Eliminar Producto (Protegido)
+#### Eliminar Producto (Admin)
 ```http
-DELETE /api/products/:id
+DELETE /api/admin/products/:id
 ```
 Headers:
 ```
 Authorization: Bearer tu-token-aquí
 ```
 
-## Ejemplos de Uso con cURL
-
-### Registro
-```bash
-curl -X POST http://localhost:3000/api/auth/register \
--H "Content-Type: application/json" \
--d '{"email": "test@ejemplo.com", "password": "123456"}'
+#### Subir Productos CSV (Admin)
+```http
+POST /api/admin/products/upload
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+Content-Type: multipart/form-data
+```
+Body:
+```
+file: archivo.csv
 ```
 
-### Login
-```bash
-curl -X POST http://localhost:3000/api/auth/login \
--H "Content-Type: application/json" \
--d '{"email": "test@ejemplo.com", "password": "123456"}'
+### Carrito
+
+#### Obtener Carrito
+```http
+GET /api/cart
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
 ```
 
-### Crear Producto (con token)
-```bash
-curl -X POST http://localhost:3000/api/products \
--H "Content-Type: application/json" \
--H "Authorization: Bearer TU_TOKEN" \
--d '{"name": "Producto Test", "description": "Descripción", "price": 99.99, "stock": 10}'
+#### Añadir al Carrito
+```http
+POST /api/cart
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+```
+Body:
+```json
+{
+    "productId": "id_producto",
+    "quantity": 1
+}
 ```
 
-### Obtener Productos
-```bash
-curl http://localhost:3000/api/products
+#### Actualizar Cantidad
+```http
+PUT /api/cart/:productId
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+```
+Body:
+```json
+{
+    "quantity": 2
+}
+```
+
+#### Eliminar del Carrito
+```http
+DELETE /api/cart/:productId
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+```
+
+### Pedidos
+
+#### Crear Pedido
+```http
+POST /api/orders
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+```
+Body:
+```json
+{
+    "address": "Dirección de envío",
+    "paymentMethod": "tarjeta"
+}
+```
+
+#### Obtener Pedidos del Usuario
+```http
+GET /api/orders
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+```
+
+#### Obtener Detalles de Pedido
+```http
+GET /api/orders/:id
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+```
+
+### Administración
+
+#### Obtener Todos los Usuarios (Admin)
+```http
+GET /api/admin/users
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
+```
+
+#### Obtener Todos los Pedidos (Admin)
+```http
+GET /api/admin/orders
+```
+Headers:
+```
+Authorization: Bearer tu-token-aquí
 ```
 
 ## Estructura del Proyecto
@@ -160,24 +274,36 @@ src/
   │   └── database.js     # Configuración de MongoDB
   ├── controllers/
   │   ├── auth.controller.js    # Lógica de autenticación
-  │   └── product.controller.js # Lógica de productos
+  │   ├── product.controller.js # Lógica de productos
+  │   ├── cart.controller.js    # Lógica del carrito
+  │   ├── order.controller.js   # Lógica de pedidos
+  │   └── admin.controller.js   # Lógica de administración
   ├── middleware/
-  │   └── auth.js         # Middleware de autenticación JWT
+  │   ├── auth.js         # Middleware de autenticación JWT
+  │   └── admin.js        # Middleware de verificación de admin
   ├── models/
   │   ├── User.js         # Modelo de usuario
-  │   └── Product.js      # Modelo de producto
+  │   ├── Product.js      # Modelo de producto
+  │   ├── Cart.js         # Modelo de carrito
+  │   └── Order.js        # Modelo de pedido
   ├── routes/
   │   ├── auth.routes.js  # Rutas de autenticación
-  │   └── product.routes.js # Rutas de productos
+  │   ├── product.routes.js # Rutas de productos
+  │   ├── cart.routes.js  # Rutas del carrito
+  │   ├── order.routes.js # Rutas de pedidos
+  │   └── admin.routes.js # Rutas de administración
   └── index.js            # Punto de entrada
 ```
 
 ## Notas Importantes
-- Los tokens JWT expiran en 1 hora
+- Los tokens JWT expiran en 24 horas
 - Las contraseñas se encriptan con bcrypt antes de almacenarse
 - Las rutas protegidas requieren el token JWT en el header
 - La base de datos es persistente gracias a los volúmenes de Docker
 - Mongo Express permite administrar la base de datos visualmente
+- Los roles de usuario son: ROLE_USER y ROLE_ADMIN
+- Las imágenes de productos deben ser URLs válidas
+- El carrito se limpia automáticamente al crear un pedido
 
 ## Códigos de Error Comunes
 
@@ -198,10 +324,27 @@ src/
 }
 ```
 
+### Errores de Autorización (403)
+```json
+{
+    "message": "Admin access required"
+}
+```
+
 ### Errores de Recursos (404)
 ```json
 {
     "message": "Product not found"
+}
+```
+```json
+{
+    "message": "Cart not found"
+}
+```
+```json
+{
+    "message": "Order not found"
 }
 ```
 
@@ -209,5 +352,22 @@ src/
 ```json
 {
     "message": "User already exists"
+}
+```
+```json
+{
+    "message": "Invalid product data"
+}
+```
+```json
+{
+    "message": "Insufficient stock"
+}
+```
+
+### Errores del Servidor (500)
+```json
+{
+    "message": "Internal server error"
 }
 ```

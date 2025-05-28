@@ -12,58 +12,59 @@ import { DecimalPipe } from '@angular/common';
   standalone: true,
   imports: [CommonModule, DecimalPipe],
   template: `
-    <div class="container mx-auto p-4">
-      <div *ngIf="product" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="md:flex">
-          <div class="md:w-1/2">
-            <img [src]="product.img" [alt]="product.name" 
-                 class="w-full h-96 object-cover">
-          </div>
-          <div class="md:w-1/2 p-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-4">{{product.name}}</h1>
-            <p class="text-gray-600 mb-4">{{product.description}}</p>
-            <p class="text-2xl font-bold text-blue-600 mb-4">{{product.price | number:'1.2-2'}}€</p>
-            <p class="text-sm text-gray-500 mb-6">Stock disponible: {{product.stock}}</p>
-            
-            <button (click)="addToCart()"
-                    class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg 
-                           hover:bg-blue-700 transition-colors mb-4"
-                    [disabled]="isAddingToCart"
-                    [class.opacity-50]="isAddingToCart">
-              <span *ngIf="!isAddingToCart">Añadir al carrito</span>
-              <span *ngIf="isAddingToCart">Añadiendo...</span>
-            </button>
-            
-            <button (click)="goBack()"
-                    class="w-full bg-gray-200 text-gray-800 px-6 py-3 rounded-lg 
-                           hover:bg-gray-300 transition-colors">
-              Volver a productos
-            </button>
+    <div class="min-h-screen bg-gray-50 py-8">
+      <div class="container mx-auto px-4">
+        <div *ngIf="product" class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="md:flex">
+            <div class="md:w-1/2 relative">
+              <img [src]="product.img" [alt]="product.name" 
+                   class="w-full h-96 object-cover">
+              <div *ngIf="product.stock === 0" 
+                   class="absolute top-4 right-4 bg-red-500 text-white px-3 py-2 rounded-lg">
+                Sin stock
+              </div>
+              <div *ngIf="product.stock > 0 && product.stock <= 5" 
+                   class="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-2 rounded-lg">
+                Quedan pocas unidades
+              </div>
+            </div>
+            <div class="md:w-1/2 p-6">
+              <h1 class="text-3xl font-bold text-gray-900 mb-3">{{product.name}}</h1>
+              <p class="text-gray-600 mb-4">{{product.description}}</p>
+              <p class="text-3xl font-bold text-blue-600 mb-6">{{product.price | number:'1.2-2'}}€</p>
+              
+              <div class="space-y-3">
+                <button (click)="addToCart()"
+                        class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+                        [disabled]="product.stock === 0">
+                  Añadir al carrito
+                </button>
+                
+                <button (click)="goBack()"
+                        class="w-full bg-gray-100 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-200">
+                  Volver
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div *ngIf="!product" class="text-center py-8">
-        <p class="text-gray-600">Cargando producto...</p>
-      </div>
-      
-      <div *ngIf="error" class="mt-4 text-center text-red-600">
-        {{ error }}
-      </div>
-      
-      <div *ngIf="successMessage" 
-           class="fixed bottom-4 right-4 bg-green-100 border border-green-400 
-                  text-green-700 px-4 py-3 rounded shadow-lg">
-        {{successMessage}}
+        
+        <div *ngIf="!product" class="text-center py-16">
+          <p class="text-gray-600">Cargando...</p>
+        </div>
+        
+        <div *ngIf="error" class="mt-6 text-center">
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg inline-block">
+            {{ error }}
+          </div>
+        </div>
       </div>
     </div>
   `
 })
 export class ProductDetailsComponent implements OnInit {
   product: Product | null = null;
-  error: string = '';
-  successMessage: string = '';
-  isAddingToCart: boolean = false;
+  error = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -84,36 +85,21 @@ export class ProductDetailsComponent implements OnInit {
     this.productService.getProduct(id)
       .subscribe({
         next: (product) => this.product = product,
-        error: (error) => {
-          console.error('Error cargando producto:', error);
-          this.error = 'Error al cargar el producto';
-        }
+        error: () => this.error = 'Error al cargar el producto'
       });
   }
 
   addToCart() {
-    if (!this.product || this.isAddingToCart) return;
+    if (!this.product) return;
     
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
     }
     
-    this.isAddingToCart = true;
     this.cartService.addToCart(this.product)
       .subscribe({
-        next: () => {
-          this.successMessage = `${this.product?.name} añadido al carrito`;
-          setTimeout(() => {
-            this.successMessage = '';
-            this.isAddingToCart = false;
-          }, 3000);
-        },
-        error: (error) => {
-          console.error('Error al añadir al carrito:', error);
-          this.error = 'Error al añadir al carrito';
-          this.isAddingToCart = false;
-        }
+        error: () => this.error = 'Error al añadir al carrito'
       });
   }
 

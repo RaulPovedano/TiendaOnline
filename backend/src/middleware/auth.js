@@ -23,3 +23,14 @@ export const authenticateToken = async (req, res, next) => {
     return res.status(401).json({ message: "Invalid token" });
   }
 };
+
+export const isAdmin = async (req, res, next) => {
+  try {
+    if (req.user.role !== 'ROLE_ADMIN') {
+      return res.status(403).json({ message: "Access denied. Admin role required." });
+    }
+    next();
+  } catch (error) {
+    return res.status(500).json({ message: "Error checking admin role" });
+  }
+};

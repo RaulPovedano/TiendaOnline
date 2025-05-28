@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { CartService } from '../../services/cart.service';
 
 @Component({
   selector: 'app-login',
@@ -19,16 +20,12 @@ import { AuthService } from '../../services/auth.service';
         <form class="mt-8 space-y-6" (ngSubmit)="onSubmit()">
           <div class="rounded-md shadow-sm -space-y-px">
             <div>
-              <label for="email" class="sr-only">Email</label>
-              <input id="email" name="email" type="email" required
-                [(ngModel)]="email"
+              <input type="email" [(ngModel)]="email" name="email" required
                 class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Email">
             </div>
             <div>
-              <label for="password" class="sr-only">Contraseña</label>
-              <input id="password" name="password" type="password" required
-                [(ngModel)]="password"
+              <input type="password" [(ngModel)]="password" name="password" required
                 class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Contraseña">
             </div>
@@ -56,25 +53,21 @@ import { AuthService } from '../../services/auth.service';
   `
 })
 export class LoginComponent {
-  email: string = '';
-  password: string = '';
-  error: string = '';
+  email = '';
+  password = '';
+  error = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private auth: AuthService, private cartService: CartService, private router: Router) {}
 
   onSubmit() {
     this.error = '';
-    this.authService.login(this.email, this.password)
+    this.auth.login(this.email, this.password)
       .subscribe({
         next: () => {
+          this.cartService.reloadCart();
           this.router.navigate(['/']);
         },
-        error: (err) => {
-          this.error = 'Error al iniciar sesión. Por favor, verifica tus credenciales.';
-        }
+        error: () => this.error = 'Error al iniciar sesión'
       });
   }
 } 

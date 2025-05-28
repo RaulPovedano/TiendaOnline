@@ -20,16 +20,30 @@ export class CartService {
     private authService: AuthService,
     private router: Router
   ) {
-    this.loadCart();
+    if (this.authService.isLoggedIn()) {
+      this.loadCart();
+    }
+  }
+
+  // Método público para recargar el carrito tras login
+  public reloadCart() {
+    if (this.authService.isLoggedIn()) {
+      this.loadCart();
+    } else {
+      this.cartSubject.next(null);
+    }
   }
 
   private loadCart() {
-    if (this.authService.isLoggedIn()) {
-      this.http.get<Cart>(`${this.apiUrl}`).subscribe({
-        next: (cart) => this.cartSubject.next(cart),
-        error: () => this.cartSubject.next(null)
-      });
-    }
+    this.http.get<Cart>(`${this.apiUrl}`).subscribe({
+      next: (cart) => {
+        this.cartSubject.next(cart);
+      },
+      error: (error) => {
+        console.error('Error al cargar el carrito:', error);
+        this.cartSubject.next(null);
+      }
+    });
   }
 
   addToCart(product: Product): Observable<Cart> {
@@ -44,7 +58,6 @@ export class CartService {
     }).pipe(
       tap(cart => {
         this.cartSubject.next(cart);
-        console.log('Producto añadido al carrito:', cart);
       }),
       catchError(error => {
         console.error('Error al añadir al carrito:', error);
@@ -88,7 +101,6 @@ export class CartService {
     if (!cart || !cart.items || !Array.isArray(cart.items)) {
       return 0;
     }
-    
     return cart.items.reduce((total, item) => {
       if (item && typeof item.productId === 'object' && item.productId.price && item.quantity) {
         return total + (item.productId.price * item.quantity);
@@ -110,11 +122,13 @@ export class CartService {
     return this.http.post<any>(`${this.apiUrl}/checkout`, checkoutData).pipe(
       tap(response => {
         this.cartSubject.next(response.cart);
-        console.log('Checkout successful:', response);
       }),
       catchError(error => {
         console.error('Error during checkout:', error);
-        return throwError(() => error);
+        if (error.error && error.error.message) {
+          return throwError(() => new Error(error.error.message));
+        }
+        return throwError(() => new Error('Error al procesar el pedido'));
       })
     );
   }

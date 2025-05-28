@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { OrderService } from '../../services/order.service';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { Order } from '../../models/order.model';
 import { DecimalPipe } from '@angular/common';
 import { User } from '../../models/user.model';
+import { InvoiceService } from '../../services/invoice.service';
 
 @Component({
   selector: 'app-profile',
@@ -19,58 +19,49 @@ import { User } from '../../models/user.model';
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <!-- Información del Usuario -->
           <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-2xl font-bold mb-6">Mi Perfil</h2>
-            <div class="space-y-4">
-              <div *ngIf="!isEditing">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                  <p class="mt-1 text-gray-900">{{ user?.name }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Email</label>
-                  <p class="mt-1 text-gray-900">{{ user?.email }}</p>
-                </div>
-                
-                <div class="flex justify-center space-x-4 mt-6">
-                  <button (click)="editProfile()" 
-                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                    Editar Perfil
-                  </button>
-                </div>
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold">Mi Perfil</h2>
+              <button *ngIf="!isEditing" (click)="startEditing()"
+                      class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
+                Editar Perfil
+              </button>
+            </div>
+
+            <!-- Vista de datos -->
+            <div *ngIf="!isEditing" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                <p class="mt-1 text-gray-900">{{ user?.name }}</p>
               </div>
-
-              <!-- Formulario de Edición -->
-              <div *ngIf="isEditing" class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input type="text" [(ngModel)]="editedUser.name" 
-                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Email</label>
-                  <input type="email" [(ngModel)]="editedUser.email" 
-                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                </div>
-                
-                <div class="flex justify-center space-x-4 mt-6">
-                  <button (click)="saveProfile()" 
-                          class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                    Guardar Cambios
-                  </button>
-                  <button (click)="cancelEdit()"
-                          class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                    Cancelar
-                  </button>
-                </div>
-
-                <div *ngIf="error" class="mt-4 p-4 bg-red-100 text-red-700 rounded-lg">
-                  {{ error }}
-                </div>
-                <div *ngIf="successMessage" class="mt-4 p-4 bg-green-100 text-green-700 rounded-lg">
-                  {{ successMessage }}
-                </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <p class="mt-1 text-gray-900">{{ user?.email }}</p>
               </div>
             </div>
+
+            <!-- Formulario de edición -->
+            <form *ngIf="isEditing" (ngSubmit)="updateProfile()" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" [(ngModel)]="editUser.name" name="name"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" [(ngModel)]="editUser.email" name="email"
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              </div>
+              <div class="flex justify-end space-x-4">
+                <button type="button" (click)="cancelEdit()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                  Cancelar
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
           </div>
 
           <!-- Historial de Pedidos (solo para usuarios normales) -->
@@ -111,6 +102,14 @@ import { User } from '../../models/user.model';
                   <p class="text-sm text-gray-500">Método de pago: {{order.paymentMethod}}</p>
                   <p class="text-lg font-bold">Total: {{order.total | number:'1.2-2'}}€</p>
                 </div>
+
+                <div class="mt-4 flex justify-end">
+                  <button (click)="downloadInvoice(order)"
+                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                    <i class="fas fa-download"></i>
+                    Descargar Factura
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -143,70 +142,96 @@ import { User } from '../../models/user.model';
 })
 export class ProfileComponent implements OnInit {
   user: User | null = null;
-  orders: Order[] = [];
-  isEditing = false;
-  editedUser = {
+  editUser: User = {
+    email: '',
     name: '',
-    email: ''
+    role: 'ROLE_USER'
   };
-  error: string = '';
-  successMessage: string = '';
+  orders: Order[] = [];
+  isEditing: boolean = false;
 
   constructor(
     private authService: AuthService,
-    private orderService: OrderService
+    private orderService: OrderService,
+    private invoiceService: InvoiceService,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    this.authService.user$.subscribe(user => {
-      this.user = user;
-      if (user?.role === 'ROLE_USER') {
-        this.loadOrders();
+    this.loadUserData();
+    this.loadOrders();
+  }
+
+  loadUserData() {
+    this.authService.getCurrentUser().subscribe({
+      next: (user) => {
+        if (user) {
+          this.user = user;
+          this.editUser = {
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+          };
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando datos del usuario:', error);
+        this.router.navigate(['/login']);
       }
     });
   }
 
   loadOrders() {
     this.orderService.getUserOrders().subscribe({
-      next: (orders) => {
-        this.orders = orders.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+      next: (orders: Order[]) => {
+        this.orders = orders;
       },
-      error: (error) => console.error('Error cargando pedidos:', error)
+      error: (error: Error) => {
+        console.error('Error cargando pedidos:', error);
+      }
     });
   }
 
-  editProfile() {
+  startEditing() {
     this.isEditing = true;
-    this.editedUser = {
-      name: this.user?.name || '',
-      email: this.user?.email || ''
+  }
+
+  updateProfile() {
+    const updateData = {
+      name: this.editUser.name,
+      email: this.editUser.email
     };
-    this.error = '';
-    this.successMessage = '';
+
+    this.authService.updateProfile(updateData).subscribe({
+      next: (updatedUser) => {
+        this.user = updatedUser;
+        this.editUser = {
+          _id: updatedUser._id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          role: updatedUser.role
+        };
+        this.isEditing = false;
+        alert('Perfil actualizado correctamente');
+      },
+      error: (error) => {
+        console.error('Error actualizando perfil:', error);
+        alert('Error al actualizar el perfil');
+      }
+    });
   }
 
   cancelEdit() {
+    if (this.user) {
+      this.editUser = {
+        _id: this.user._id,
+        email: this.user.email,
+        name: this.user.name,
+        role: this.user.role
+      };
+    }
     this.isEditing = false;
-    this.error = '';
-    this.successMessage = '';
-  }
-
-  saveProfile() {
-    if (!this.user?._id) return;
-
-    this.authService.updateProfile(this.user._id, this.editedUser).subscribe({
-      next: (updatedUser) => {
-        this.user = updatedUser;
-        this.isEditing = false;
-        this.successMessage = 'Perfil actualizado correctamente';
-        setTimeout(() => this.successMessage = '', 3000);
-      },
-      error: (error) => {
-        this.error = error.error?.message || 'Error al actualizar el perfil';
-      }
-    });
   }
 
   getStatusClass(status: string): string {
@@ -241,5 +266,21 @@ export class ProfileComponent implements OnInit {
       default:
         return status;
     }
+  }
+
+  downloadInvoice(order: Order) {
+    this.invoiceService.downloadInvoice(order._id || '').subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `factura-${order._id}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error: Error) => {
+        console.error('Error descargando factura:', error);
+      }
+    });
   }
 }
