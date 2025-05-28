@@ -1,11 +1,8 @@
 services:
   - type: web
     name: tiendaonline
-    env: node
-    buildCommand: |
-      cd frontend && rm -rf .angular/cache && npm install && npm run build
-      cd ../backend && npm install
-    startCommand: cd backend && npm start
+    env: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: NODE_ENV
         value: production

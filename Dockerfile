@@ -18,8 +18,15 @@ RUN npm install
 COPY backend .
 
 # Copia el build del frontend al backend
-COPY --from=frontend-build /app/frontend/dist/frontend ./frontend/dist/frontend
+COPY --from=frontend-build /app/frontend/dist/frontend ./public
 
+# Configura las variables de entorno
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV FRONTEND_URL=http://localhost:3000
+
+# Expone el puerto
 EXPOSE 3000
 
+# Inicia el servidor
 CMD ["node", "src/index.js"] 
