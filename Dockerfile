@@ -18,7 +18,7 @@ RUN npm install
 COPY backend .
 
 # Copia el build del frontend al backend
-COPY --from=frontend-build /app/frontend/dist/frontend ./public
+COPY --from=frontend-build /app/frontend/dist/frontend/browser ./public
 
 # Configura las variables de entorno
 ENV NODE_ENV=production
