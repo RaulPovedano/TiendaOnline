@@ -16,4 +16,4 @@ services:
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
       - key: FRONTEND_URL
-        value: https://tu-app.onrender.com 
+        value: https://tiendaonline.onrender.com 
