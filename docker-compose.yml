@@ -1,0 +1,72 @@
+version: '3.8'
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://backend:3000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    container_name: frontend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/tienda?authSource=admin
+      - JWT_SECRET=your_jwt_secret
+      - PORT=3000
+      
+      - mongodb
+    networks:
+      - app-network
+    container_name: backend
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=tienda
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+    container_name: mongodb
+
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=password
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+    container_name: mongo-express
+
+volumes:
+  mongodb_data: 
