@@ -8,6 +8,7 @@ import { ChartType, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { AdminService } from '../../services/admin.service';
 import { NgChartsModule } from 'ng2-charts';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin-orders',
@@ -145,7 +146,7 @@ import { NgChartsModule } from 'ng2-charts';
 export class AdminOrdersComponent implements OnInit {
   orders: Order[] = [];
   selectedOrder: Order | null = null;
-  private apiUrl = 'http://localhost:3000/api/admin/orders';
+  private apiUrl = environment.apiUrl + '/admin/orders';
   topCustomer: any = null;
   barChartData: any = {
     labels: [],

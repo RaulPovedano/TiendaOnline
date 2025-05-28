@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../../models/user.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin-users',
@@ -127,7 +128,7 @@ import { User } from '../../models/user.model';
 export class AdminUsersComponent implements OnInit {
   users: User[] = [];
   editingUser: User | null = null;
-  private apiUrl = 'http://localhost:3000/api/admin/users';
+  private apiUrl = environment.apiUrl + '/admin/users';
 
   constructor(private http: HttpClient) {}
 

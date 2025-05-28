@@ -6,6 +6,7 @@ import { Product } from '../../models/product.model';
 import { DecimalPipe } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin-products',
@@ -149,7 +150,7 @@ export class AdminProductsComponent implements OnInit {
   editingProduct: Product | null = null;
   selectedFile: File | null = null;
   showCsvUpload = false;
-  private apiUrl = 'http://localhost:3000/api/admin/products';
+  private apiUrl = environment.apiUrl + '/admin/products';
 
   constructor(
     private http: HttpClient,
