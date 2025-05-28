@@ -1,19 +1,27 @@
 services:
   - type: web
-    name: tienda-online
+    name: tiendaonline
     env: node
     buildCommand: |
-      cd frontend && npm install && npm run build
+      cd frontend && rm -rf .angular/cache && npm install && npm run build
       cd ../backend && npm install
-    startCommand: cd backend && npm run dev
+    startCommand: cd backend && npm start
     envVars:
-      - key: MONGODB_URI
-        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: FRONTEND_URL
+        value: https://tiendaonline.onrender.com
       - key: JWT_SECRET
         sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
-      - key: FRONTEND_URL
-        value: https://tiendaonline.onrender.com 
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false 
