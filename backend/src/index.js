@@ -17,6 +17,9 @@ import { fileURLToPath } from 'url';
 // Cargamos las variables de entorno
 dotenv.config();
 
+// Conectar a la base de datos
+connectDB();
+
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
