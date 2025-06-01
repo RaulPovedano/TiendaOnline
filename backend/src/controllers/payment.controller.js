@@ -3,7 +3,7 @@ import { Order } from '../models/Order.js';
 
 export const createPaymentIntent = async (req, res) => {
   try {
-    const { amount, paymentMethod, orderId } = req.body;
+    const { amount, orderId } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ message: "El monto debe ser mayor que 0" });

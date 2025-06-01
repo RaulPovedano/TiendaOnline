@@ -6,9 +6,6 @@ router.post('/', async (req, res) => {
     try {
         const { name, email, message } = req.body;
         
-        // Aquí puedes agregar la lógica para procesar el mensaje
-        // Por ejemplo, enviar un email, guardar en base de datos, etc.
-        
         res.status(200).json({ 
             success: true, 
             message: 'Mensaje recibido correctamente' 

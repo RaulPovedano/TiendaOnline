@@ -1,5 +1,3 @@
-import { Product } from './product.model';
-
 export interface OrderItem {
   productId: {
     _id: string;

@@ -1,7 +1,7 @@
 # Frontend Tienda Online con Angular
 
 ## Descripción
-Frontend de una tienda online desarrollado con Angular 17, utilizando Tailwind CSS para los estilos y siguiendo un diseño responsive. La aplicación incluye autenticación de usuarios, catálogo de productos, carrito de compras, gestión de pedidos y panel de administración.
+Frontend de una tienda online desarrollado con Angular, utilizando Tailwind CSS para los estilos y siguiendo un diseño responsive. La aplicación incluye autenticación de usuarios, catálogo de productos, carrito de compras, gestión de pedidos y panel de administración.
 
 ## Requisitos Previos
 - Node.js 20+
@@ -25,15 +25,6 @@ ng serve
 
 La aplicación estará disponible en `http://localhost:4200`
 
-### Desarrollo con Docker
-
-1. Clona el repositorio
-2. Ejecuta los contenedores:
-```bash
-docker-compose up --build
-```
-
-La aplicación estará disponible en `http://localhost:80`
 
 ## Estructura del Proyecto
 ```
@@ -126,14 +117,14 @@ src/
 ### Carrito
 - Vista compacta en móvil
 - Vista expandida en escritorio
-- Controles táctiles
+- Controles
 - Resumen responsive
 
 ### Formularios
 - Campos adaptables
 - Validación en tiempo real
 - Mensajes de error claros
-- Botones táctiles
+- Botones
 
 ## Tecnologías Utilizadas
 

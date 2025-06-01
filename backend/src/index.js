@@ -1,4 +1,3 @@
-// src/index.js
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -38,7 +37,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/contact", contactRoutes);
 
-// Servir archivos estáticos del frontend en producción
+
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../public')));
   
@@ -47,7 +46,7 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Error handling middleware para manejar errores de rutas no encontradas y errores de servidor 
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: "¡Ups! Algo salió mal!" });

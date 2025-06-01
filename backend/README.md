@@ -1,27 +1,16 @@
 # Backend API con Node.js, MongoDB y JWT
 
 ## Descripción
-Backend basado en Node.js y MongoDB que proporciona una API completa para una tienda online. Incluye autenticación de usuarios, gestión de productos, carrito de compras y gestión de pedidos. Utiliza JWT (JSON Web Tokens) para la autenticación y Docker para su despliegue.
+Backend basado en Node.js y MongoDB que proporciona una API para una tienda online. Incluye autenticación de usuarios, gestión de productos, carrito de compras y gestión de pedidos. Utiliza JWT (JSON Web Tokens) para la autenticación y Docker para su despliegue.
 
-## Requisitos Previos
-- Docker y Docker Compose instalados
-- Node.js 20+ (si se ejecuta localmente)
 
-## Instalación con Docker
-
-1. Clona el repositorio
-2. Crea un archivo `.env` en la raíz del proyecto:
+1. Crea un archivo `.env` en la carpeta /backend del proyecto:
 ```env
 PORT=3000
-MONGODB_URI=mongodb://admin:hlanz@mongodb:27017/db_apis?authSource=admin
-JWT_SECRET=your_jwt_secret_key
+MONGODB_URI=mongodb://admin:password@mongodb:27017/db_apis?authSource=admin
+JWT_SECRET=tu_jwt_secreto
 STRIPE_SECRET_KEY=sk_test_7665789......
 STRIPE_PUBLISHABLE_KEY=pk_test_6568288.....
-```
-
-3. Ejecuta los contenedores:
-```bash
-docker-compose up --build
 ```
 
 Los servicios estarán disponibles en:
@@ -29,7 +18,7 @@ Los servicios estarán disponibles en:
 - MongoDB: localhost:27017
 - Mongo Express (Administración BD): http://localhost:8081
   - Usuario: admin
-  - Contraseña: hlanz
+  - Contraseña: password
 
 ## Endpoints
 
@@ -315,59 +304,59 @@ src/
 ```
 ```json
 {
-    "message": "Invalid token"
+    "message": "Token inválido"
 }
 ```
 ```json
 {
-    "message": "Invalid credentials"
+    "message": "Credenciales inválidas"
 }
 ```
 
 ### Errores de Autorización (403)
 ```json
 {
-    "message": "Admin access required"
+    "message": "Acceso denegado. Se requiere rol de administrador."
 }
 ```
 
 ### Errores de Recursos (404)
 ```json
 {
-    "message": "Product not found"
+    "message": "Producto no encontrado"
 }
 ```
 ```json
 {
-    "message": "Cart not found"
+    "message": "Carrito no encontrado"
 }
 ```
 ```json
 {
-    "message": "Order not found"
+    "message": "Pedido no encontrado"
 }
 ```
 
 ### Errores de Validación (400)
 ```json
 {
-    "message": "User already exists"
+    "message": "El usuario ya existe"
 }
 ```
 ```json
 {
-    "message": "Invalid product data"
+    "message": "Datos de producto inválidos"
 }
 ```
 ```json
 {
-    "message": "Insufficient stock"
+    "message": "Stock insuficiente"
 }
 ```
 
 ### Errores del Servidor (500)
 ```json
 {
-    "message": "Internal server error"
+    "message": "¡Ups! Algo salió mal!"
 }
 ```

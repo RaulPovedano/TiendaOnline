@@ -26,7 +26,6 @@ export class CartService {
     }
   }
 
-  // Método público para recargar el carrito tras login
   public reloadCart() {
     if (this.authService.isLoggedIn()) {
       this.loadCart();

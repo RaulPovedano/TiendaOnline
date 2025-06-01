@@ -1,5 +1,4 @@
 import { Order } from "../models/Order.js";
-import { User } from "../models/User.js";
 import PDFDocument from "pdfkit/js/pdfkit.js";
 
 export const generateInvoice = async (req, res) => {
@@ -10,12 +9,12 @@ export const generateInvoice = async (req, res) => {
       .populate('userId');
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Pedido no encontrado" });
     }
 
     // Verificar que el usuario tiene permiso para ver esta factura
     if (order.userId._id.toString() !== req.user._id.toString() && req.user.role !== 'ROLE_ADMIN') {
-      return res.status(403).json({ message: "Not authorized to view this invoice" });
+      return res.status(403).json({ message: "No autorizado para ver esta factura" });
     }
 
     // Crear el PDF
@@ -80,7 +79,7 @@ export const generateInvoice = async (req, res) => {
     // Finalizar el PDF
     doc.end();
   } catch (error) {
-    console.error('Error generating invoice:', error);
-    res.status(500).json({ message: "Error generating invoice" });
+    console.error('Error generar factura:', error);
+    res.status(500).json({ message: "Error generar factura" });
   }
 }; 

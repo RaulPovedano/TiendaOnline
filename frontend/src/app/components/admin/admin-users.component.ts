@@ -19,7 +19,6 @@ import { environment } from '../../../environments/environment';
         </button>
       </div>
 
-      <!-- Vista móvil -->
       <div class="sm:hidden space-y-4">
         <div *ngFor="let user of users" class="bg-white rounded-lg shadow p-4">
           <div class="flex items-center gap-4 mb-3">
@@ -41,7 +40,6 @@ import { environment } from '../../../environments/environment';
         </div>
       </div>
 
-      <!-- Vista desktop -->
       <div class="hidden sm:block bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -77,7 +75,6 @@ import { environment } from '../../../environments/environment';
         </div>
       </div>
 
-      <!-- Formulario de edición/creación -->
       <div *ngIf="editingUser" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
         <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-md">
           <h3 class="text-lg sm:text-xl font-bold mb-4">{{ editingUser._id ? 'Editar' : 'Crear' }} Usuario</h3>
@@ -167,7 +164,6 @@ export class AdminUsersComponent implements OnInit {
         error: (error) => console.error('Error actualizando usuario:', error)
       });
     } else {
-      // Create new user
       this.http.post<User>(this.apiUrl, this.editingUser).subscribe({
         next: (newUser) => {
           this.users.push(newUser);
