@@ -5,9 +5,9 @@ import { HttpClient } from '@angular/common/http';
 import { Order } from '../../models/order.model';
 import { DecimalPipe } from '@angular/common';
 import { ChartType, ChartOptions } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
 import { AdminService } from '../../services/admin.service';
 import { NgChartsModule } from 'ng2-charts';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin-orders',
@@ -57,7 +57,6 @@ import { NgChartsModule } from 'ng2-charts';
         </table>
       </div>
       
-      <!-- Modal de detalles del pedido -->
       <div *ngIf="selectedOrder" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
           <div class="flex justify-between items-center mb-4">
@@ -145,7 +144,7 @@ import { NgChartsModule } from 'ng2-charts';
 export class AdminOrdersComponent implements OnInit {
   orders: Order[] = [];
   selectedOrder: Order | null = null;
-  private apiUrl = 'http://localhost:3000/api/admin/orders';
+  private apiUrl = environment.apiUrl + '/admin/orders';
   topCustomer: any = null;
   barChartData: any = {
     labels: [],

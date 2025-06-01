@@ -69,7 +69,6 @@ import { StripeService } from '../../services/stripe.service';
           </form>
         </div>
 
-        <!-- Resumen del pedido -->
         <div class="bg-white p-6 rounded-lg shadow-md">
           <h3 class="text-xl font-semibold mb-4">Resumen del Pedido</h3>
           
@@ -95,7 +94,6 @@ import { StripeService } from '../../services/stripe.service';
             </div>
           </div>
 
-          <!-- Método de pago -->
           <div class="mt-6">
             <h4 class="font-semibold mb-3">Método de Pago</h4>
             <div class="space-y-2">
@@ -111,7 +109,6 @@ import { StripeService } from '../../services/stripe.service';
             </div>
           </div>
 
-          <!-- Elemento de Stripe -->
           <div *ngIf="paymentMethod === 'credit_card'" class="mt-4">
             <div id="card-element" class="w-full px-3 py-2 border rounded-lg"></div>
             <div id="card-errors" class="text-red-500 mt-2" role="alert"></div>
@@ -150,16 +147,13 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // No inicializamos Stripe aquí, lo haremos cuando se seleccione el método de pago
   }
 
   async onPaymentMethodChange() {
     if (this.paymentMethod === 'credit_card') {
       try {
-        // Esperar a que el elemento esté en el DOM
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Verificar que el elemento existe
         const cardElement = document.getElementById('card-element');
         if (!cardElement) {
           throw new Error('No se encontró el elemento para la tarjeta');
@@ -233,7 +227,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         throw new Error('El total del carrito debe ser mayor que 0');
       }
 
-      // Preparar los datos de envío
       const shippingData = {
         fullName: this.shippingData.fullName.trim(),
         address: this.shippingData.address.trim(),
@@ -242,7 +235,6 @@ export class CheckoutComponent implements OnInit, OnDestroy {
         phone: this.shippingData.phone.trim()
       };
 
-      // Crear la orden primero
       const response = await firstValueFrom(
         this.cartService.checkout({
           shippingData,

@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-// Añadir el esquema de datos de envío
 const shippingDataSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   address: { type: String, required: true },

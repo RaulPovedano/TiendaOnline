@@ -6,6 +6,7 @@ import { Product } from '../../models/product.model';
 import { DecimalPipe } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin-products',
@@ -26,7 +27,6 @@ import { Router } from '@angular/router';
         </div>
       </div>
 
-      <!-- Subir CSV -->
       <div *ngIf="showCsvUpload" class="bg-white p-4 rounded-lg shadow mb-6">
         <h3 class="text-lg font-bold mb-4">Subir Productos (CSV)</h3>
         <div class="space-y-4">
@@ -44,7 +44,6 @@ import { Router } from '@angular/router';
         </div>
       </div>
       
-      <!-- Vista móvil -->
       <div class="sm:hidden space-y-4">
         <div *ngFor="let product of products" class="bg-white rounded-lg shadow p-4">
           <div class="flex items-center gap-4 mb-3">
@@ -65,7 +64,6 @@ import { Router } from '@angular/router';
         </div>
       </div>
 
-      <!-- Vista desktop -->
       <div class="hidden sm:block bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -98,7 +96,6 @@ import { Router } from '@angular/router';
         </div>
       </div>
       
-      <!-- Formulario de edición/creación -->
       <div *ngIf="editingProduct" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
         <div class="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-md">
           <h3 class="text-lg sm:text-xl font-bold mb-4">{{ editingProduct._id ? 'Editar' : 'Crear' }} Producto</h3>
@@ -149,7 +146,7 @@ export class AdminProductsComponent implements OnInit {
   editingProduct: Product | null = null;
   selectedFile: File | null = null;
   showCsvUpload = false;
-  private apiUrl = 'http://localhost:3000/api/admin/products';
+  private apiUrl = environment.apiUrl + '/admin/products';
 
   constructor(
     private http: HttpClient,

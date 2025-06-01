@@ -1,4 +1,3 @@
-// src/index.js
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -16,6 +15,9 @@ import { fileURLToPath } from 'url';
 
 // Cargamos las variables de entorno
 dotenv.config();
+
+// Conectar a la base de datos
+connectDB();
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -35,16 +37,12 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/contact", contactRoutes);
 
-// Servir archivos estáticos del frontend en producción
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../frontend/dist/frontend')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/dist/frontend/index.html'));
-  });
-}
+// Servir el frontend (Angular build)
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/dist', 'index.html'));
+});
 
-// Error handling middleware para manejar errores de rutas no encontradas y errores de servidor 
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: "¡Ups! Algo salió mal!" });

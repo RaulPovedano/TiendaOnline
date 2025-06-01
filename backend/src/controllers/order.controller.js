@@ -10,12 +10,12 @@ export const createOrder = async (req, res) => {
       const product = await Product.findById(item.productId);
       if (!product) {
         return res.status(404).json({ 
-          message: `Product not found: ${item.productId}` 
+          message: `Producto no encontrado: ${item.productId}` 
         });
       }
       if (product.stock < item.quantity) {
         return res.status(400).json({ 
-          message: `Insufficient stock for product: ${product.name}` 
+          message: `Stock insuficiente para el producto: ${product.name}` 
         });
       }
       item.price = product.price;
@@ -40,7 +40,7 @@ export const createOrder = async (req, res) => {
 
     res.status(201).json(order);
   } catch (error) {
-    res.status(500).json({ message: "Error creating order" });
+    res.status(500).json({ message: "Error crear pedido" });
   }
 };
 
@@ -51,7 +51,7 @@ export const getOrders = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching orders" });
+    res.status(500).json({ message: "Error obtener pedidos" });
   }
 };
 
@@ -63,11 +63,11 @@ export const getOrder = async (req, res) => {
     }).populate('items.productId');
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Pedido no encontrado" });
     }
     res.json(order);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching order" });
+    res.status(500).json({ message: "Error obtener pedido" });
   }
 };
 
@@ -81,11 +81,11 @@ export const updateOrderStatus = async (req, res) => {
     );
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Pedido no encontrado" });
     }
     res.json(order);
   } catch (error) {
-    res.status(500).json({ message: "Error updating order status" });
+    res.status(500).json({ message: "Error actualizar estado del pedido" });
   }
 };
 
@@ -97,12 +97,12 @@ export const cancelOrder = async (req, res) => {
     });
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Pedido no encontrado" });
     }
 
     if (order.status !== 'pending') {
       return res.status(400).json({ 
-        message: "Can only cancel pending orders" 
+        message: "Solo se pueden cancelar pedidos pendientes" 
       });
     }
 
@@ -116,8 +116,8 @@ export const cancelOrder = async (req, res) => {
       );
     }
 
-    res.json({ message: "Order canceled successfully" });
+    res.json({ message: "Pedido cancelado correctamente" });
   } catch (error) {
-    res.status(500).json({ message: "Error canceling order" });
+    res.status(500).json({ message: "Error cancelar pedido" });
   }
 };

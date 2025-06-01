@@ -26,7 +26,7 @@ export const updateUser = async (req, res) => {
     if (email) {
       const existingUser = await User.findOne({ email, _id: { $ne: userId } });
       if (existingUser) {
-        return res.status(400).json({ message: "Email already in use" });
+        return res.status(400).json({ message: "Email ya en uso" });
       }
     }
 
@@ -37,13 +37,13 @@ export const updateUser = async (req, res) => {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
     res.json(updatedUser);
   } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: "Error updating user" });
+    console.error('Error actualizar usuario:', error);
+    res.status(500).json({ message: "Error actualizar usuario" });
   }
 };
 
@@ -54,13 +54,13 @@ export const deleteUser = async (req, res) => {
     const deletedUser = await User.findByIdAndDelete(userId);
     
     if (!deletedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "usuario no encontrado" });
     }
 
-    res.json({ message: "User deleted successfully" });
+    res.json({ message: "Usuario eliminado correctamente" });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ message: "Error deleting user" });
+    console.error('Error eliminar usuario:', error);
+    res.status(500).json({ message: "Error eliminar usuario" });
   }
 };
 
@@ -70,8 +70,8 @@ export const getAllProducts = async (req, res) => {
     const products = await Product.find();
     res.json(products);
   } catch (error) {
-    console.error('Error getting products:', error);
-    res.status(500).json({ message: "Error getting products" });
+    console.error('Error obtener productos:', error);
+    res.status(500).json({ message: "Error obtener productos" });
   }
 };
 
@@ -100,7 +100,7 @@ export const createProduct = async (req, res) => {
     }
 
     if (typeof stock !== 'number' || stock < 0) {
-      return res.status(400).json({ message: "El stock debe ser un número no negativo" });
+      return res.status(400).json({ message: "El stock debe ser un número positivo" });
     }
 
     const product = new Product({
@@ -114,9 +114,9 @@ export const createProduct = async (req, res) => {
     await product.save();
     res.status(201).json(product);
   } catch (error) {
-    console.error('Error creating product:', error);
+    console.error('Error crear producto:', error);
     res.status(500).json({ 
-      message: "Error creating product",
+      message: "Error crear producto",
       error: error.message 
     });
   }
@@ -133,13 +133,13 @@ export const updateProduct = async (req, res) => {
     );
 
     if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Producto no encontrado" });
     }
 
     res.json(updatedProduct);
   } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ message: "Error updating product" });
+    console.error('Error actualizar producto:', error);
+    res.status(500).json({ message: "Error actualizar producto" });
   }
 };
 
@@ -150,13 +150,13 @@ export const deleteProduct = async (req, res) => {
     const deletedProduct = await Product.findByIdAndDelete(productId);
     
     if (!deletedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Producto no encontrado" });
     }
 
-    res.json({ message: "Product deleted successfully" });
+    res.json({ message: "Producto eliminado correctamente" });
   } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ message: "Error deleting product" });
+    console.error('Error eliminar producto:', error);
+    res.status(500).json({ message: "Error eliminar producto" });
   }
 };
 
@@ -169,8 +169,8 @@ export const getAllOrders = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(orders);
   } catch (error) {
-    console.error('Error getting orders:', error);
-    res.status(500).json({ message: "Error getting orders" });
+    console.error('Error obtener pedidos:', error);
+    res.status(500).json({ message: "Error obtener pedidos" });
   }
 };
 
@@ -189,13 +189,13 @@ export const updateOrderStatus = async (req, res) => {
     .populate('items.productId');
 
     if (!updatedOrder) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({ message: "Pedido no encontrado" });
     }
 
     res.json(updatedOrder);
   } catch (error) {
-    console.error('Error updating order status:', error);
-    res.status(500).json({ message: "Error updating order status" });
+    console.error('Error actualizar estado del pedido:', error);
+    res.status(500).json({ message: "Error actualizar estado del pedido" });
   }
 };
 
@@ -216,11 +216,10 @@ export const getTopCustomer = async (req, res) => {
       return res.json({ user: null, totalOrders: 0 });
     }
 
-    // Populate user info
     const user = await User.findById(result[0]._id).select("name email");
     res.json({ user, totalOrders: result[0].totalOrders });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching top customer" });
+    res.status(500).json({ message: "Error obtener cliente top" });
   }
 };
 

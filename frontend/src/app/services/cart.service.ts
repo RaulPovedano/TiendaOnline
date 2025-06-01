@@ -6,12 +6,13 @@ import { Cart } from '../models/cart.model';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { Product } from '../models/product.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  private apiUrl = 'http://localhost:3000/api/cart';
+  private apiUrl = environment.apiUrl + '/cart';
   private cartSubject = new BehaviorSubject<Cart | null>(null);
   cart$ = this.cartSubject.asObservable();
 
@@ -25,7 +26,6 @@ export class CartService {
     }
   }
 
-  // Método público para recargar el carrito tras login
   public reloadCart() {
     if (this.authService.isLoggedIn()) {
       this.loadCart();

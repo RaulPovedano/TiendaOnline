@@ -95,7 +95,6 @@ export class StripeService {
         payment_method: {
           card: this.cardElement,
           billing_details: {
-            // Aquí puedes agregar detalles de facturación si los tienes
           }
         }
       });

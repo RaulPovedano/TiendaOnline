@@ -6,10 +6,14 @@ config();
 
 export const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("MongoDB connected successfully");
+    console.log("[DEBUG] Intentando conectar a MongoDB con URI:", process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      family: 4
+    });
+
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
     process.exit(1);
   }
 };

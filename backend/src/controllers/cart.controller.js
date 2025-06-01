@@ -7,8 +7,8 @@ export const getCart = async (req, res) => {
     let cart = await Cart.findOne({ userId: req.user._id })
       .populate({
         path: 'items.productId',
-        model: 'Product', // Asegurar que usa el modelo correcto
-        select: 'name price img stock' // Selecciona solo estos campos
+        model: 'Product', 
+        select: 'name price img stock' 
       });
 
     if (!cart) {
@@ -22,8 +22,8 @@ export const getCart = async (req, res) => {
 
     res.json(cart);
   } catch (error) {
-    console.error('Error fetching cart:', error);
-    res.status(500).json({ message: "Error fetching cart" });
+    console.error('Error obtener carrito:', error);
+    res.status(500).json({ message: "Error obtener carrito" });
   }
 };
 
@@ -32,10 +32,10 @@ export const addToCart = async (req, res) => {
   try {
     const { productId, quantity = 1 } = req.body;
 
-    // Verificar que el producto existe
+    
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Producto no encontrado" });
     }
 
     // Buscar o crear el carrito del usuario
@@ -65,7 +65,7 @@ export const addToCart = async (req, res) => {
     // Guardar el carrito
     await cart.save();
     
-    // Poblar el carrito con los datos del producto
+    // Llenar el carrito con los datos del producto
     await cart.populate({
       path: 'items.productId',
       model: 'Product',
@@ -81,8 +81,8 @@ export const addToCart = async (req, res) => {
 
     res.status(200).json(cart);
   } catch (error) {
-    console.error('Error adding to cart:', error);
-    res.status(500).json({ message: "Error adding to cart" });
+    console.error('Error agregar al carrito:', error);
+    res.status(500).json({ message: "Error agregar al carrito" });
   }
 };
 
@@ -91,7 +91,7 @@ export const updateCartItem = async (req, res) => {
     const productId = req.params.productId;
     const { quantity } = req.body;
 
-    // Validar que quantity es un número positivo
+    // Validar que la cantidad es un número positivo
     if (!Number.isInteger(quantity) || quantity < 0) {
       return res.status(400).json({ 
         message: "Quantity must be a positive integer" 
@@ -101,20 +101,20 @@ export const updateCartItem = async (req, res) => {
     // Buscar el producto primero
     const product = await Product.findById(productId);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ message: "Producto no encontrado" });
     }
 
     // Verificar stock disponible
     if (product.stock < quantity) {
       return res.status(400).json({ 
-        message: `Insufficient stock. Available: ${product.stock}` 
+        message: `Stock insuficiente. Disponible: ${product.stock}` 
       });
     }
 
     // Buscar el carrito del usuario
     let cart = await Cart.findOne({ userId: req.user._id });
     if (!cart) {
-      return res.status(404).json({ message: "Cart not found" });
+      return res.status(404).json({ message: "Carrito no encontrado" });
     }
 
     // Encontrar el ítem en el carrito
@@ -123,7 +123,7 @@ export const updateCartItem = async (req, res) => {
     );
 
     if (itemIndex === -1) {
-      return res.status(404).json({ message: "Item not found in cart" });
+      return res.status(404).json({ message: "Item no encontrado en el carrito" });
     }
 
     // Actualizar o eliminar el ítem
@@ -133,11 +133,11 @@ export const updateCartItem = async (req, res) => {
       cart.items[itemIndex].quantity = quantity;
     }
 
-    // Guardar y poblar el carrito
+    // Guardar y llenar el carrito
     await cart.save();
     await cart.populate({
       path: 'items.productId',
-      select: 'name price img stock' // Seleccionar solo los campos necesarios
+      select: 'name price img stock'
     });
     
     // Calcular el total
@@ -242,7 +242,7 @@ export const checkout = async (req, res) => {
       total += product.price * item.quantity;
     }
 
-    // Crear la orden
+    // Crear el pedido
     const order = new Order({
       userId: req.user._id,
       items: orderItems,

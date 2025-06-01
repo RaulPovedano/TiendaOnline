@@ -137,7 +137,7 @@ export class ContactComponent {
         error: (error) => {
           this.errorMessage = 'Error al enviar el mensaje. Por favor, inténtalo de nuevo.';
           this.isSubmitting = false;
-          console.error('Error sending contact email:', error);
+          console.error('Error al enviar el mensaje:', error);
         }
       });
     } else {
