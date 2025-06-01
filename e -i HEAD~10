@@ -1,0 +1,33 @@
+[33md325fa3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelop_raul[m[33m)[m fix: elimina clave secreta de Stripe de los archivos públicos
+[33m37b95be[m docs: actualiza el README de la raíz con instrucciones y detalles corregidos
+[33m11be99e[m dockerizado completamente y funcionando
+[33mf3c8893[m[33m ([m[1;31morigin/develop_raul[m[33m)[m fix: llama a connectDB() al iniciar el backend para asegurar conexión a MongoDB
+[33m822fd1c[m debug: agrega logs de depuración para conexión a MongoDB
+[33mf7c9de0[m solucion: rutas del backend actualizadas para apuntar a Railway
+[33md328f45[m fix: agrega el script start en backend y frontend para despliegue en Railway
+[33m52d765e[m chore: add Dockerfile and railway.json for Railway deployment
+[33m4398d75[m feat: add MONGODB_URI environent variable to render.yaml
+[33m79e10a5[m fix: uso de environment.apiUrl en todos los servicios y componentes
+[33m0c2d43f[m correcion url backend
+[33meb92028[m fix: ruta correcta de build Angular en Dockerfile
+[33mbe04489[m Eliminadas variables de Cloudinary no utilizadas
+[33m239178f[m Solución despliegue
+[33m259f8d1[m fix: eliminar MONGODB_URI de render.yaml para usar solo la del panel
+[33m03ce09b[m fix: eliminar Dockerfile redundante en backend para evitar conflictos de build
+[33mc88ac57[m fix: actualizar FRONTEND_URL a la url real de Render
+[33mce76d9a[m build limpio frontend
+[33m8c2fa8e[m solucion de errores
+[33m59d4ca7[m Fix: servir frontend subiendo un nivel desde src
+[33m3238432[m Fix: ruta definitiva para servir frontend en Docker
+[33mde40ec5[m Fix: ruta correcta para servir el frontend en Docker
+[33mffa4d26[m Restaurar Dockerfile en la raíz para despliegue en Render
+[33m0c3040d[m[33m ([m[1;31morigin/main[m[33m)[m proyecto dockerizado entero
+[33m41fe5bd[m proyecto dockerizado
+[33me2b7c6f[m dockerizado
+[33m377a70f[m perfil administrador terminado
+[33m268b7bf[m avances de todo el mes de abril
+[33me0fb93f[m implementacion de roles usuarios
+[33mc2e427f[m login y register funcionando
+[33m150cc1f[m pagina principal funcionando, mostrando productos
+[33m4f158b3[m[33m ([m[1;32mstaging[m[33m)[m backend tablas Order y Cart creadas y frontend con angular installado y un index de prueba
+[33md3be80e[m Primer commit
