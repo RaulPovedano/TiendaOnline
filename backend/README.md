@@ -9,8 +9,14 @@ Backend basado en Node.js y MongoDB que proporciona una API para una tienda onli
 PORT=3000
 MONGODB_URI=mongodb://admin:password@mongodb:27017/db_apis?authSource=admin
 JWT_SECRET=tu_jwt_secreto
-STRIPE_SECRET_KEY=sk_test_7665789......
-STRIPE_PUBLISHABLE_KEY=pk_test_6568288.....
+```env
+PORT=3000
+MONGODB_URI=mongodb://admin:password@mongodb:27017/tienda?authSource=admin
+JWT_SECRET=your_jwt_secret
+STRIPE_SECRET_KEY=sk_test_51R8OWePoP3Gj5SX8PDg4GF5od8fLjpyRREZ8pxETdHgTrW3vhCt7DWsePZu5WuU4337sus48IBhMffrtds8iMSmJ00jt0OT6W5
+STRIPE_PUBLISHABLE_KEY=pk_test_51R8OWePoP3Gj5SX86xi0a9fU3Q3h6LoemxRBjRf4iSXEkDRQ08obgZAkI5YjZ1RX4gE6RT3Kh2PNpO9Bc3yxmoyz00UXnOMCHB
+FRONTEND_URL=http://localhost:4200
+```
 ```
 
 Los servicios estarán disponibles en:

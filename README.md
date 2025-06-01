@@ -2,7 +2,13 @@
 
 https://tienda-online-production-08a4.up.railway.app
 
+# PAGO
 
+Tanto para local como desplegada la tarjeta de pago es:
+
+```bash
+4242 4242 4242 4242 123 12/27 18008
+````
 # Tienda Online - Despliegue Local
 
 
@@ -30,15 +36,18 @@ cd TiendaOnline
 
 ## 2. Configura las variables de entorno
 
-Puedes usar las variables ya definidas en `docker-compose.yml` o crear un archivo `.env` en la raíz del proyecto.  
+Puedes usar las variables ya definidas en `docker-compose.yml` o crear un archivo `.env` en la carpeta /backend del proyecto.  
 Ejemplo de `.env` para el backend:
+
+
+LAS CLAVES SECRETAS SON LAS MIAS REALES PARAA HACER LA PRUEBA DEL PAGO.
 
 ```env
 PORT=3000
 MONGODB_URI=mongodb://admin:password@mongodb:27017/tienda?authSource=admin
 JWT_SECRET=your_jwt_secret
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_51R8OWePoP3Gj5SX8PDg4GF5od8fLjpyRREZ8pxETdHgTrW3vhCt7DWsePZu5WuU4337sus48IBhMffrtds8iMSmJ00jt0OT6W5
+STRIPE_PUBLISHABLE_KEY=pk_test_51R8OWePoP3Gj5SX86xi0a9fU3Q3h6LoemxRBjRf4iSXEkDRQ08obgZAkI5YjZ1RX4gE6RT3Kh2PNpO9Bc3yxmoyz00UXnOMCHB
 FRONTEND_URL=http://localhost:4200
 ```
 
