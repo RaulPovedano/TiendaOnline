@@ -2,6 +2,11 @@
 
 https://tienda-online-production-08a4.up.railway.app
 
+# USUARIOS:
+
+Admin: raul@gmail.com pass: 12345678
+User: raul2@gmail.com pass: 12345678
+
 # PAGO
 
 Tanto para local como desplegada la tarjeta de pago es:
@@ -46,12 +51,28 @@ LAS CLAVES SECRETAS SON LAS MIAS REALES PARAA HACER LA PRUEBA DEL PAGO.
 PORT=3000
 MONGODB_URI=mongodb://admin:password@mongodb:27017/tienda?authSource=admin
 JWT_SECRET=your_jwt_secret
-STRIPE_SECRET_KEY=sk_test....
-STRIPE_PUBLISHABLE_KEY=pk_test...
+STRIPE_SECRET_KEY=STRIPE_SECRET_KEY=sk_test_51R8OWePoP3Gj5SX8PDg4GF5od8fLjpyRREZ8pxETdHgTrW3vhCt7DWsePZu5WuU4337sus48IBhMffrtds8iMSmJ00jt0OT6W5
+STRIPE_PUBLISHABLE_KEY=STRIPE_PUBLISHABLE_KEY=pk_test_51R8OWePoP3Gj5SX86xi0a9fU3Q3h6LoemxRBjRf4iSXEkDRQ08obgZAkI5YjZ1RX4gE6RT3Kh2PNpO9Bc3yxmoyz00UXnOMCHB
 FRONTEND_URL=http://localhost:4200
 ```
 
-## 3. Construye y levanta los contenedores
+## 3. Instala las dependencias (si no estan instaladas)
+
+Antes de construir los contenedores, necesitas instalar las dependencias tanto en el backend como en el frontend:
+
+```bash
+# Instalar dependencias del backend
+cd backend
+npm install
+cd ..
+
+# Instalar dependencias del frontend
+cd frontend
+npm install
+cd ..
+```
+
+## 4. Construye y levanta los contenedores
 
 ```bash
 docker-compose up --build
@@ -65,7 +86,7 @@ Esto levantará:
 
 ---
 
-## 4. Accede a la aplicación
+## 5. Accede a la aplicación
 
 - **Frontend Angular:**  
   [http://localhost:4200](http://localhost:4200)
@@ -80,13 +101,13 @@ Esto levantará:
 
 ---
 
-## 5. Datos
+## 6. Datos
 
 Puedes crear productos, usuarios, etc. desde el frontend o usando Mongo Express.
 
 ---
 
-## 6. Parar los contenedores
+## 7. Parar los contenedores
 
 Para detener todos los servicios:
 
@@ -101,5 +122,14 @@ docker-compose down
 - Si cambias variables de entorno, reinicia los contenedores.
 - Si tienes problemas de puertos ocupados, asegúrate de que no tienes otros servicios corriendo en los mismos puertos.
 - Puedes modificar los archivos de entorno (`environment.ts` y `environment.prod.ts`) para cambiar las URLs del backend según tu entorno.
+- **Importante para Docker:** Cuando ejecutes la aplicación con Docker, debes cambiar en el archivo `frontend/src/environments/environment.prod.ts` la URL de la API de:
+  ```typescript
+  apiUrl: 'https://tienda-online-production-08a4.up.railway.app/api'
+  ```
+  a:
+  ```typescript
+  apiUrl: 'http://localhost:3000/api'
+  ```
+  para que el frontend se comunique con el backend del contenedor.
 
 ---
