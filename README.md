@@ -72,6 +72,18 @@ npm install
 cd ..
 ```
 
+- **Importante para Docker:** Cuando ejecutes la aplicación con Docker, debes cambiar en el archivo `frontend/src/environments/environment.prod.ts` la URL de la API de:
+  ```typescript
+  apiUrl: 'https://tienda-online-production-08a4.up.railway.app/api'
+  ```
+  a:
+  ```typescript
+  apiUrl: 'http://localhost:3000/api'
+  ```
+  para que el frontend se comunique con el backend del contenedor.
+
+---
+
 ## 4. Construye y levanta los contenedores
 
 ```bash
@@ -122,14 +134,3 @@ docker-compose down
 - Si cambias variables de entorno, reinicia los contenedores.
 - Si tienes problemas de puertos ocupados, asegúrate de que no tienes otros servicios corriendo en los mismos puertos.
 - Puedes modificar los archivos de entorno (`environment.ts` y `environment.prod.ts`) para cambiar las URLs del backend según tu entorno.
-- **Importante para Docker:** Cuando ejecutes la aplicación con Docker, debes cambiar en el archivo `frontend/src/environments/environment.prod.ts` la URL de la API de:
-  ```typescript
-  apiUrl: 'https://tienda-online-production-08a4.up.railway.app/api'
-  ```
-  a:
-  ```typescript
-  apiUrl: 'http://localhost:3000/api'
-  ```
-  para que el frontend se comunique con el backend del contenedor.
-
----
